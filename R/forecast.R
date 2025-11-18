@@ -56,11 +56,12 @@ point_forecast <- function(fitted, horizon = 1L) {
   check_setup()
 
   JuliaCall::julia_assign("fitted_obj", fitted)
+  JuliaCall::julia_assign("h", as.integer(horizon))
 
+  # Julia converts single integers to 1:horizon, so we need to always pass a vector
+  # to get the exact horizons requested
   if (length(horizon) == 1) {
-    JuliaCall::julia_assign("h", as.integer(horizon))
-  } else {
-    JuliaCall::julia_assign("h", as.integer(horizon))
+    JuliaCall::julia_eval("h = [h]")
   }
 
   result <- JuliaCall::julia_eval("ForecastBaselines.point_forecast(fitted_obj, h)")
@@ -173,7 +174,11 @@ interval_forecast <- function(fitted, method, horizon = 1L, levels = 0.95) {
   JuliaCall::julia_assign("fitted_obj", fitted)
   JuliaCall::julia_assign("method_obj", method)
   JuliaCall::julia_assign("h", as.integer(horizon))
+  # Ensure levels is always a vector in Julia
   JuliaCall::julia_assign("lvls", as.numeric(levels))
+  if (length(levels) == 1) {
+    JuliaCall::julia_eval("lvls = [lvls]")
+  }
 
   result <- JuliaCall::julia_eval("
     ForecastBaselines.interval_forecast(fitted_obj, method_obj, h, lvls)
@@ -227,7 +232,7 @@ TemporalInfo <- function(start = 1, resolution = 1) {
 convert_forecast_to_r <- function(jl_forecast) {
   # Store Julia forecast in a persistent variable for later use (e.g., scoring)
   # Use a unique identifier
-  fc_id <- paste0("__fc_", as.integer(Sys.time() * 1000000) %% 1000000)
+  fc_id <- paste0("__fc_", as.integer(as.numeric(Sys.time()) * 1000000) %% 1000000)
   JuliaCall::julia_assign(fc_id, jl_forecast)
 
   # Extract components using Julia field access
