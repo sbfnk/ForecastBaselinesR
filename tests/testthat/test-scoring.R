@@ -1,14 +1,3 @@
-# Helper function to check if Julia is set up
-skip_if_no_julia <- function() {
-  if (!is_setup()) {
-    skip("Julia is not set up. Run setup_ForecastBaselines() to run these tests.")
-  }
-}
-
-# Sample data for testing
-sample_data <- c(10, 12, 13, 14, 15, 16, 18, 19, 20, 22, 21, 23)
-truth_values <- c(24, 25, 26)
-
 test_that("MAE scoring rule works", {
   skip_if_no_julia()
 

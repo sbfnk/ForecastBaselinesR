@@ -1,10 +1,3 @@
-# Helper function to check if Julia is set up
-skip_if_no_julia <- function() {
-  if (!is_setup()) {
-    skip("Julia is not set up. Run setup_ForecastBaselines() to run these tests.")
-  }
-}
-
 test_that("NoTransform can be created", {
   skip_if_no_julia()
 
