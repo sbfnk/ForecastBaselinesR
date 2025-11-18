@@ -17,7 +17,7 @@ Depends:
 Imports:
     JuliaCall (>= 0.17.0)
 SystemRequirements: Julia (>= 1.9)
-RoxygenNote: 7.0.0
+RoxygenNote: 7.3.3
 URL: https://github.com/ManuelStapper/ForecastBaselines.jl
 BugReports: https://github.com/ManuelStapper/ForecastBaselines.jl/issues
 Suggests:
