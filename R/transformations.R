@@ -52,7 +52,7 @@ LogTransform <- function() {
 LogPlusOneTransform <- function(c = 1.0) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.LogPlusOneTransform(c=%f)",
+    "ForecastBaselines.LogPlusOneTransform(%f)",
     as.numeric(c)
   ))
 }
@@ -93,7 +93,7 @@ SquareRootTransform <- function() {
 PowerTransform <- function(lambda) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.PowerTransform(λ=%f)",
+    "ForecastBaselines.PowerTransform(%f)",
     as.numeric(lambda)
   ))
 }
@@ -120,7 +120,7 @@ PowerTransform <- function(lambda) {
 PowerPlusOneTransform <- function(lambda, constant = 1.0) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.PowerPlusOneTransform(λ=%f, c=%f)",
+    "ForecastBaselines.PowerPlusOneTransform(%f, %f)",
     as.numeric(lambda), as.numeric(constant)
   ))
 }

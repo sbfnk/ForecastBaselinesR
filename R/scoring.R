@@ -272,7 +272,8 @@ PIT_function <- function(forecast) {
     fc_var <- "fc_temp"
   }
 
-  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.PIT_function(%s)", fc_var)))
+  # PIT_function expects a Vector{Forecast}, so wrap in array
+  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.PIT_function([%s])", fc_var)))
 }
 
 #' Cramér-von Mises Divergence
@@ -302,5 +303,6 @@ CvM_divergence <- function(forecast) {
     fc_var <- "fc_temp"
   }
 
-  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.CvM_divergence(%s)", fc_var)))
+  # CvM_divergence expects a Vector{Forecast}, so wrap in array
+  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.CvM_divergence([%s])", fc_var)))
 }
