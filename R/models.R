@@ -95,34 +95,36 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 #'
 #' Creates an ordinary least squares model with polynomial trend.
 #'
-#' @param degree Polynomial degree (default: 1 for linear trend)
-#' @param d Differencing degree (default: 0 for no differencing)
+#' @param degree Polynomial degree (1=linear, 2=quadratic, 3=cubic, etc., default: 1)
+#' @param n_obs Number of recent observations to use for fitting (default: NULL, auto-computed as degree + 2)
 #'
 #' @return An OLSModel object
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' # Linear trend
+#' # Linear trend (uses last 3 observations by default)
 #' model <- OLSModel(degree = 1)
 #'
-#' # Quadratic trend with first differencing
-#' model <- OLSModel(degree = 2, d = 1)
+#' # Quadratic trend (uses last 4 observations by default)
+#' model <- OLSModel(degree = 2)
+#'
+#' # Linear trend with specific number of observations
+#' model <- OLSModel(degree = 1, n_obs = 10)
 #' }
-OLSModel <- function(degree = 1L, d = 0L) {
+OLSModel <- function(degree = 1L, n_obs = NULL) {
   check_setup()
-  # Only pass d parameter if it's non-zero
-  if (d == 0) {
-    JuliaCall::julia_eval(sprintf(
-      "ForecastBaselines.OLSModel(p=%d)",
-      as.integer(degree)
-    ))
-  } else {
-    JuliaCall::julia_eval(sprintf(
-      "ForecastBaselines.OLSModel(p=%d, d=%d)",
-      as.integer(degree), as.integer(d)
-    ))
+
+  # If n_obs not specified, compute as degree + 2 (ensures p >= 1 + d)
+  if (is.null(n_obs)) {
+    n_obs <- as.integer(degree) + 2L
   }
+
+  # Julia parameters: p (n_obs), d (degree)
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.OLSModel(p=%d, d=%d)",
+    as.integer(n_obs), as.integer(degree)
+  ))
 }
 
 #' IDS Model
@@ -181,7 +183,7 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 #' @param p AR order (default: 0)
 #' @param q MA order (default: 0)
 #' @param s Seasonal period (default: 0 for no seasonality)
-#' @param trend Trend function (default: identity for no trend)
+#' @param trend Logical indicating whether to include linear trend (default: FALSE)
 #'
 #' @return An ARMAModel object
 #' @export
@@ -196,23 +198,19 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 #'
 #' # ARMA(2,1) with seasonality
 #' model <- ARMAModel(p = 2, q = 1, s = 12)
+#'
+#' # ARMA(1,1) with linear trend
+#' model <- ARMAModel(p = 1, q = 1, trend = TRUE)
 #' }
-ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = identity) {
+ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = FALSE) {
   check_setup()
 
-  # For now, we don't pass the trend parameter as the Julia package
-  # may have a different interface than initially documented
-  if (s == 0) {
-    JuliaCall::julia_eval(sprintf(
-      "ForecastBaselines.ARMAModel(p=%d, q=%d)",
-      as.integer(p), as.integer(q)
-    ))
-  } else {
-    JuliaCall::julia_eval(sprintf(
-      "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d)",
-      as.integer(p), as.integer(q), as.integer(s)
-    ))
-  }
+  # trend should be a boolean value
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d, trend=%s)",
+    as.integer(p), as.integer(q), as.integer(s),
+    tolower(as.character(trend))
+  ))
 }
 
 #' INARCH Model
