@@ -554,24 +554,107 @@ Documentation is available through Julia's help system:
 ?score
 ```
 
-(More details to be added)
+### Model Comparison
+
+```r
+models <- list(
+  Naive = ConstantModel(),
+  ARMA = ARMAModel(p = 2, q = 1),
+  STL = STLModel(s = 12)
+)
+
+results <- lapply(names(models), function(name) {
+  fitted <- fit_baseline(data, models[[name]])
+  fc <- forecast(fitted, horizon = 1:12, truth = truth)
+  data.frame(
+    Model = name,
+    MAE = score(fc, MAE()),
+    CRPS = score(fc, CRPS())
+  )
+})
+
+comparison <- do.call(rbind, results)
+print(comparison)
+```
+
+### Data Transformation
+
+```r
+# Fit to log-transformed data
+model <- ARMAModel(p = 1)
+trans <- LogTransform()
+model_trans <- transform_model(model, trans)
+
+fitted <- fit_baseline(data, model_trans)
+# Forecasts automatically back-transformed
+fc <- forecast(fitted, horizon = 1:10)
+```
+
+## Features
+
+### Uncertainty Quantification
+
+Multiple interval methods:
+- **NoInterval**: Point forecasts only
+- **EmpiricalInterval**: Bootstrap from historical errors
+- **ParametricInterval**: Model-based parametric intervals
+- **ModelTrajectoryInterval**: Simulate from fitted model
+
+### Scoring Rules
+
+**Point Forecast Scores**:
+- MAE, MdAE, MAPE
+- MSE, MSPE, RMSE
+- Bias, RelativeBias
+
+**Probabilistic Scores**:
+- CRPS (Continuous Ranked Probability Score)
+- WIS (Weighted Interval Score)
+- CRPS from trajectories
+
+### Calibration Assessment
+
+- PIT (Probability Integral Transform) functions
+- Cramér-von Mises divergence
+
+## Repository Structure
+
+```
+.
+├── ForecastBaselinesR/     # R package
+│   ├── R/                  # R functions
+│   ├── examples/           # Example scripts
+│   ├── README.md           # Package documentation
+│   ├── INSTALL.md          # Installation guide
+│   ├── QUICKSTART.md       # Quick start guide
+│   └── DESCRIPTION         # Package metadata
+├── LICENSE.txt             # MIT License
+└── README.md               # This file
+```
+
+## License
+
+MIT License - see [LICENSE.txt](LICENSE.txt) for details
+
+## Citation
+
+If you use this package in your research, please cite:
+
+```bibtex
+@software{forecastbaselines,
+  title = {ForecastBaselinesR: Baseline Forecasting Models for R},
+  year = {2024},
+  url = {https://github.com/ManuelStapper/ForecastBaselines.jl}
+}
+```
 
 ## Contributing
 
 Contributions are welcome through issues and pull requests.
-To add models, see also ModelTemplate.jl
 
-## Citation
+## Bug reports
 
-```bibtex
-@software{ForecastBaselines.jl,
-  author = {Manuel Stapper},
-  title = {ForecastBaselines.jl: Baseline Forecasting Methods in Julia},
-  url = {https://github.com/ManuelStapper/ForecastBaselines.jl},
-  version = {0.1.0},
-  year = {2025}
-}
-```
+For bugs and feature requests, please open an issue on [GitHub](https://github.com/ManuelStapper/ForecastBaselines.jl/issues).
 
 ## Licence
 

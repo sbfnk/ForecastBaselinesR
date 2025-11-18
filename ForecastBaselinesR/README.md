@@ -1,6 +1,6 @@
 # ForecastBaselinesR
 
-An R interface to the [ForecastBaselines.jl](https://github.com/sbfnk/ForecastBaselines.jl) Julia package, providing access to 10 baseline forecasting models with comprehensive uncertainty quantification and evaluation tools.
+An R interface to the [ForecastBaselines.jl](https://github.com/ManuelStapper/ForecastBaselines.jl) Julia package, providing access to 10 baseline forecasting models with comprehensive uncertainty quantification and evaluation tools.
 
 ## Features
 
@@ -48,7 +48,7 @@ An R interface to the [ForecastBaselines.jl](https://github.com/sbfnk/ForecastBa
 devtools::install_local("/path/to/ForecastBaselinesR")
 
 # Or if using GitHub (when published)
-# devtools::install_github("sbfnk/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
+# devtools::install_github("ManuelStapper/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
 ```
 
 ### Setup
@@ -316,7 +316,7 @@ setup_ForecastBaselines(rebuild = TRUE)
 If automatic installation fails, install ForecastBaselines.jl manually in Julia:
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")
+Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")
 ```
 
 Then in R:
@@ -333,7 +333,7 @@ If you use this package in your research, please cite:
   title = {ForecastBaselines.jl: Baseline Forecasting Models in Julia},
   author = {...},
   year = {2024},
-  url = {https://github.com/sbfnk/ForecastBaselines.jl}
+  url = {https://github.com/ManuelStapper/ForecastBaselines.jl}
 }
 ```
 
@@ -348,5 +348,5 @@ Contributions are welcome! Please open an issue or pull request on GitHub.
 ## Support
 
 For bugs and feature requests:
-- ForecastBaselinesR issues: [GitHub Issues](https://github.com/sbfnk/ForecastBaselines.jl/issues)
-- ForecastBaselines.jl issues: [GitHub Issues](https://github.com/sbfnk/ForecastBaselines.jl/issues)
+- ForecastBaselinesR issues: [GitHub Issues](https://github.com/ManuelStapper/ForecastBaselines.jl/issues)
+- ForecastBaselines.jl issues: [GitHub Issues](https://github.com/ManuelStapper/ForecastBaselines.jl/issues)
