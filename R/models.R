@@ -47,24 +47,16 @@ MarginalModel <- function(p = NULL) {
 #'
 #' Creates a kernel density estimation model for non-parametric forecasting.
 #'
-#' @param bandwidth Bandwidth for KDE (default: NULL for automatic selection)
-#' @param kernel Kernel function to use (default: "gaussian")
-#'
 #' @return A KDEModel object
 #' @export
 #'
 #' @examples
 #' \dontrun{
 #' model <- KDEModel()
-#' model <- KDEModel(bandwidth = 0.5)
 #' }
-KDEModel <- function(bandwidth = NULL, kernel = "gaussian") {
+KDEModel <- function() {
   check_setup()
-  if (is.null(bandwidth)) {
-    JuliaCall::julia_eval("ForecastBaselines.KDEModel()")
-  } else {
-    JuliaCall::julia_call("ForecastBaselines.KDEModel", bandwidth)
-  }
+  JuliaCall::julia_eval("ForecastBaselines.KDEModel()")
 }
 
 #' Last Similar Dates (LSD) Model
@@ -135,8 +127,7 @@ OLSModel <- function(degree = 1L, n_obs = NULL) {
 #'
 #' Creates an Increase-Decrease-Stable model for trend detection.
 #'
-#' @param threshold Threshold for trend detection (default: 0.0)
-#' @param window_size Window size for trend calculation (default: 3)
+#' @param p Number of recent observations to analyze for trend detection (default: 3)
 #'
 #' @return An IDSModel object
 #' @export
@@ -144,13 +135,13 @@ OLSModel <- function(degree = 1L, n_obs = NULL) {
 #' @examples
 #' \dontrun{
 #' model <- IDSModel()
-#' model <- IDSModel(threshold = 0.1, window_size = 5)
+#' model <- IDSModel(p = 5)
 #' }
-IDSModel <- function(threshold = 0.0, window_size = 3L) {
+IDSModel <- function(p = 3L) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
     "ForecastBaselines.IDSModel(p=%d)",
-    as.integer(window_size)
+    as.integer(p)
   ))
 }
 
@@ -158,9 +149,7 @@ IDSModel <- function(threshold = 0.0, window_size = 3L) {
 #'
 #' Creates a Seasonal-Trend decomposition using Loess model.
 #'
-#' @param s Seasonal period
-#' @param trend Whether to include trend component (default: TRUE)
-#' @param robust Whether to use robust fitting (default: FALSE)
+#' @param s Seasonal period (default: 1)
 #'
 #' @return An STLModel object
 #' @export
@@ -170,10 +159,10 @@ IDSModel <- function(threshold = 0.0, window_size = 3L) {
 #' # Monthly seasonality
 #' model <- STLModel(s = 12)
 #'
-#' # Robust STL
-#' model <- STLModel(s = 12, robust = TRUE)
+#' # Weekly seasonality
+#' model <- STLModel(s = 7)
 #' }
-STLModel <- function(s, trend = TRUE, robust = FALSE) {
+STLModel <- function(s = 1L) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
     "ForecastBaselines.STLModel(s=%d)",
@@ -222,7 +211,10 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = FALSE) {
 #'
 #' Creates an Integer-valued ARCH model for count time series.
 #'
-#' @param p Order of the INARCH model
+#' @param p Autoregressive order (number of lagged counts, default: 1)
+#' @param s Seasonal period (0 for no seasonality, default: 0)
+#' @param k Number of harmonic components for seasonality (default: 1)
+#' @param nb Use negative binomial distribution instead of Poisson (default: FALSE)
 #'
 #' @return An INARCHModel object
 #' @export
@@ -230,12 +222,15 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = FALSE) {
 #' @examples
 #' \dontrun{
 #' model <- INARCHModel(p = 1)
+#' model <- INARCHModel(p = 2, s = 7)  # Weekly seasonality
+#' model <- INARCHModel(p = 1, nb = TRUE)  # Negative binomial
 #' }
-INARCHModel <- function(p = 1L) {
+INARCHModel <- function(p = 1L, s = 0L, k = 1L, nb = FALSE) {
   check_setup()
   JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.INARCHModel(p=%d)",
-    as.integer(p)
+    "ForecastBaselines.INARCHModel(p=%d, s=%d, k=%d, nb=%s)",
+    as.integer(p), as.integer(s), as.integer(k),
+    tolower(as.character(nb))
   ))
 }
 

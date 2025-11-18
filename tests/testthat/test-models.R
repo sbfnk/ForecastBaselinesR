@@ -133,7 +133,7 @@ test_that("INARCHModel works with count data", {
 test_that("IDSModel can be created and used", {
   skip_if_no_julia()
 
-  model <- IDSModel(threshold = 0.0, window_size = 3)
+  model <- IDSModel(p = 3)
   expect_true(!is.null(model))
 
   fitted <- fit_baseline(sample_data, model)
