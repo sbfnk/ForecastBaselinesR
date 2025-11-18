@@ -1,0 +1,352 @@
+# ForecastBaselinesR
+
+An R interface to the [ForecastBaselines.jl](https://github.com/sbfnk/ForecastBaselines.jl) Julia package, providing access to 10 baseline forecasting models with comprehensive uncertainty quantification and evaluation tools.
+
+## Features
+
+- **10 Forecasting Models**: From simple baselines (Constant, Marginal) to advanced time series models (ARMA, ETS, STL)
+- **Probabilistic Forecasting**: Multiple methods for prediction intervals (empirical, parametric, model-based)
+- **Comprehensive Scoring**: Point forecast metrics (MAE, RMSE) and probabilistic scores (CRPS, WIS)
+- **Data Transformations**: Log, power, Box-Cox transformations with automatic back-transformation
+- **Calibration Diagnostics**: PIT functions and Cramér-von Mises divergence
+
+## Available Models
+
+### Simple Baseline Models
+- **ConstantModel**: Naive forecast using last observed value
+- **MarginalModel**: Forecasts based on empirical marginal distribution
+- **KDEModel**: Kernel density estimation
+
+### Seasonal/Trend Models
+- **LSDModel**: Last Similar Dates method (seasonal patterns)
+- **OLSModel**: Ordinary least squares with polynomial trends
+- **IDSModel**: Increase-Decrease-Stable trend detection
+- **STLModel**: Seasonal-Trend decomposition using Loess
+
+### Advanced Time Series Models
+- **ARMAModel**: Autoregressive Moving Average
+- **INARCHModel**: Integer-valued ARCH for count data
+- **ETSModel**: Error-Trend-Season exponential smoothing (all 30 variants)
+
+## Installation
+
+### Prerequisites
+
+1. **Julia** (>= 1.9): Download from [julialang.org](https://julialang.org/downloads/)
+
+2. **R** (>= 3.5.0)
+
+3. **JuliaCall R package**:
+   ```r
+   install.packages("JuliaCall")
+   ```
+
+### Installing ForecastBaselinesR
+
+```r
+# Install from local directory
+devtools::install_local("/path/to/ForecastBaselinesR")
+
+# Or if using GitHub (when published)
+# devtools::install_github("sbfnk/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
+```
+
+### Setup
+
+After installation, initialize Julia and load ForecastBaselines.jl:
+
+```r
+library(ForecastBaselinesR)
+
+# Initialize Julia and install/load ForecastBaselines.jl
+setup_ForecastBaselines()
+```
+
+This only needs to be done once per R session. The function will:
+- Initialize Julia
+- Install ForecastBaselines.jl if not already installed
+- Load the package
+
+## Quick Start
+
+### Basic Workflow
+
+```r
+library(ForecastBaselinesR)
+setup_ForecastBaselines()
+
+# Your time series data
+data <- c(1.2, 2.3, 3.1, 2.8, 3.5, 4.2, 3.9, 4.5, 4.1, 4.8)
+
+# 1. Create a model
+model <- ARMAModel(p = 1, q = 1)
+
+# 2. Fit the model
+fitted <- fit_baseline(data, model)
+
+# 3. Generate forecasts with prediction intervals
+fc <- forecast(
+  fitted,
+  interval_method = EmpiricalInterval(n_trajectories = 1000),
+  horizon = 1:5,
+  levels = c(0.80, 0.95)
+)
+
+# 4. Evaluate with true values
+truth <- c(5.0, 5.2, 5.4, 5.1, 5.3)
+fc_with_truth <- add_truth(fc, truth)
+
+# 5. Score the forecast
+mae <- score(fc_with_truth, MAE())
+crps <- score(fc_with_truth, CRPS())
+
+cat("MAE:", mae, "\n")
+cat("CRPS:", crps, "\n")
+```
+
+## Examples
+
+### Example 1: Seasonal Data with STL
+
+```r
+# Simulated monthly data with seasonality
+set.seed(123)
+months <- 1:48
+seasonal <- sin(2 * pi * months / 12) * 2
+trend <- months * 0.1
+noise <- rnorm(48, 0, 0.3)
+data <- 10 + trend + seasonal + noise
+
+# Fit STL model with monthly seasonality
+model <- STLModel(s = 12, robust = TRUE)
+fitted <- fit_baseline(data, model)
+
+# Forecast next 12 months
+fc <- forecast(
+  fitted,
+  interval_method = EmpiricalInterval(n_trajectories = 2000, seed = 42),
+  horizon = 1:12,
+  levels = c(0.50, 0.80, 0.95),
+  model_name = "STL(12)"
+)
+
+print(fc)
+```
+
+### Example 2: Comparing Multiple Models
+
+```r
+# Create multiple models
+models <- list(
+  Naive = ConstantModel(),
+  ARMA = ARMAModel(p = 2, q = 1),
+  ETS = ETSModel(error_type = "A", trend_type = "A", season_type = "N")
+)
+
+# Fit and forecast with each model
+results <- lapply(names(models), function(name) {
+  fitted <- fit_baseline(data, models[[name]])
+  fc <- forecast(
+    fitted,
+    interval_method = EmpiricalInterval(),
+    horizon = 1:12,
+    truth = truth_values,
+    model_name = name
+  )
+
+  list(
+    model = name,
+    mae = score(fc, MAE()),
+    crps = score(fc, CRPS())
+  )
+})
+
+# Print comparison
+do.call(rbind, lapply(results, as.data.frame))
+```
+
+### Example 3: Data Transformation
+
+```r
+# Fit model to log-transformed data
+model <- ARMAModel(p = 1)
+trans <- LogTransform()
+transformed_model <- transform_model(model, trans)
+
+fitted <- fit_baseline(data, transformed_model)
+
+# Forecasts are automatically back-transformed to original scale
+fc <- forecast(
+  fitted,
+  interval_method = ParametricInterval(),
+  horizon = 1:10
+)
+```
+
+### Example 4: Count Data with INARCH
+
+```r
+# Count data (e.g., number of events per day)
+count_data <- c(5, 3, 7, 4, 6, 8, 5, 7, 9, 6, 4, 5)
+
+# INARCH model for count time series
+model <- INARCHModel(p = 1)
+fitted <- fit_baseline(count_data, model)
+
+# Forecast with positivity correction
+fc <- forecast(
+  fitted,
+  interval_method = EmpiricalInterval(
+    n_trajectories = 1000,
+    positivity_correction = "post_clip",
+    return_trajectories = TRUE
+  ),
+  horizon = 1:7
+)
+```
+
+### Example 5: Calibration Assessment
+
+```r
+# Generate forecast with intervals
+fc <- forecast(
+  fitted,
+  interval_method = EmpiricalInterval(n_trajectories = 2000),
+  horizon = 1:20,
+  levels = seq(0.1, 0.9, by = 0.1),
+  truth = observed_values
+)
+
+# Check calibration using PIT
+pit_values <- PIT_function(fc)
+hist(pit_values, breaks = 20, main = "PIT Histogram",
+     xlab = "PIT Value", col = "lightblue")
+abline(h = length(pit_values) / 20, col = "red", lty = 2)
+
+# Compute calibration divergence
+cvm <- CvM_divergence(fc)
+cat("Cramér-von Mises divergence:", cvm, "\n")
+cat("(0 = perfect calibration)\n")
+```
+
+## Interval Methods
+
+### NoInterval
+Point forecasts only:
+```r
+interval_method = NoInterval()
+```
+
+### EmpiricalInterval
+Bootstrap from historical forecast errors:
+```r
+interval_method = EmpiricalInterval(
+  n_trajectories = 1000,
+  seed = 123,
+  positivity_correction = "post_clip",
+  return_trajectories = TRUE
+)
+```
+
+### ParametricInterval
+Model-based parametric intervals (assumes normality):
+```r
+interval_method = ParametricInterval()
+```
+
+### ModelTrajectoryInterval
+Simulate from the fitted model:
+```r
+interval_method = ModelTrajectoryInterval(
+  n_trajectories = 1000,
+  seed = 456,
+  return_trajectories = TRUE
+)
+```
+
+## Scoring Rules
+
+### Point Forecast Scores
+- `MAE()` - Mean Absolute Error
+- `MdAE()` - Median Absolute Error
+- `MAPE()` - Mean Absolute Percentage Error
+- `MSE()` - Mean Squared Error
+- `RMSE()` - Root Mean Squared Error
+- `Bias()` - Forecast bias
+- `RelativeBias()` - Relative bias
+
+### Probabilistic Scores
+- `CRPS()` - Continuous Ranked Probability Score
+- `WIS()` - Weighted Interval Score
+- `CRPS_trajectory()` - CRPS from trajectories
+
+## Package Structure
+
+```
+ForecastBaselinesR/
+├── DESCRIPTION         # Package metadata
+├── NAMESPACE          # Exported functions
+├── README.md          # This file
+├── R/
+│   ├── zzz.R          # Package initialization
+│   ├── models.R       # Model constructors
+│   ├── forecast.R     # Forecasting functions
+│   ├── intervals.R    # Interval methods
+│   ├── scoring.R      # Scoring rules
+│   ├── utils.R        # Utility functions
+│   └── transformations.R  # Data transformations
+└── examples/          # Example scripts
+```
+
+## Troubleshooting
+
+### Julia not found
+If Julia is not automatically detected:
+```r
+setup_ForecastBaselines(JULIA_HOME = "/path/to/julia/bin")
+```
+
+### Package not loading
+Try rebuilding the Julia system image:
+```r
+setup_ForecastBaselines(rebuild = TRUE)
+```
+
+### Manual Julia package installation
+If automatic installation fails, install ForecastBaselines.jl manually in Julia:
+```julia
+using Pkg
+Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")
+```
+
+Then in R:
+```r
+setup_ForecastBaselines(install_package = FALSE)
+```
+
+## Citation
+
+If you use this package in your research, please cite:
+
+```
+@software{forecastbaselines,
+  title = {ForecastBaselines.jl: Baseline Forecasting Models in Julia},
+  author = {...},
+  year = {2024},
+  url = {https://github.com/sbfnk/ForecastBaselines.jl}
+}
+```
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Contributing
+
+Contributions are welcome! Please open an issue or pull request on GitHub.
+
+## Support
+
+For bugs and feature requests:
+- ForecastBaselinesR issues: [GitHub Issues](https://github.com/sbfnk/ForecastBaselines.jl/issues)
+- ForecastBaselines.jl issues: [GitHub Issues](https://github.com/sbfnk/ForecastBaselines.jl/issues)
