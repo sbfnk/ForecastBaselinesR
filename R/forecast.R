@@ -113,7 +113,11 @@ forecast <- function(fitted,
   JuliaCall::julia_assign("fitted_obj", fitted)
   JuliaCall::julia_assign("interval_method_obj", interval_method)
   JuliaCall::julia_assign("h", as.integer(horizon))
+  # Ensure levels is always a vector in Julia
   JuliaCall::julia_assign("lvls", as.numeric(levels))
+  if (length(levels) == 1) {
+    JuliaCall::julia_eval("lvls = [lvls]")
+  }
   JuliaCall::julia_assign("inc_median", include_median)
   JuliaCall::julia_assign("mdl_name", as.character(model_name))
 

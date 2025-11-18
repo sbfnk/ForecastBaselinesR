@@ -112,11 +112,10 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 OLSModel <- function(degree = 1L, s = NULL) {
   check_setup()
   if (is.null(s)) {
-    JuliaCall::julia_call("ForecastBaselines.OLSModel", as.integer(degree))
+    JuliaCall::julia_eval(sprintf("ForecastBaselines.OLSModel(p=%d)", as.integer(degree)))
   } else {
-    JuliaCall::julia_call("ForecastBaselines.OLSModel",
-                         as.integer(degree),
-                         as.integer(s))
+    JuliaCall::julia_eval(sprintf("ForecastBaselines.OLSModel(p=%d, d=%d)",
+                                  as.integer(degree), as.integer(s)))
   }
 }
 
@@ -176,8 +175,7 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 #' @param p AR order (default: 0)
 #' @param q MA order (default: 0)
 #' @param s Seasonal period (default: 0 for no seasonality)
-#' @param include_mean Whether to include a mean term (default: TRUE)
-#' @param include_drift Whether to include a drift term (default: FALSE)
+#' @param trend Trend function (default: identity for no trend)
 #'
 #' @return An ARMAModel object
 #' @export
@@ -193,15 +191,20 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 #' # ARMA(2,1) with seasonality
 #' model <- ARMAModel(p = 2, q = 1, s = 12)
 #' }
-ARMAModel <- function(p = 0L, q = 0L, s = 0L,
-                     include_mean = TRUE, include_drift = FALSE) {
+ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = identity) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.ARMAModel",
-                       as.integer(p),
-                       as.integer(q),
-                       as.integer(s),
-                       include_mean,
-                       include_drift)
+
+  # Convert trend function to Julia
+  if (identical(trend, identity)) {
+    trend_str <- "identity"
+  } else {
+    stop("Only identity trend function is currently supported")
+  }
+
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d, trend=%s)",
+    as.integer(p), as.integer(q), as.integer(s), trend_str
+  ))
 }
 
 #' INARCH Model
