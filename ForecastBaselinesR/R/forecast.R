@@ -90,23 +90,25 @@ point_forecast <- function(fitted, horizon = 1L) {
 #'
 #' # With prediction intervals
 #' fc <- forecast(fitted,
-#'                interval_method = EmpiricalInterval(n_trajectories = 1000),
-#'                horizon = 1:12,
-#'                levels = c(0.80, 0.95))
+#'   interval_method = EmpiricalInterval(n_trajectories = 1000),
+#'   horizon = 1:12,
+#'   levels = c(0.80, 0.95)
+#' )
 #'
 #' # With truth for evaluation
 #' fc <- forecast(fitted,
-#'                interval_method = EmpiricalInterval(),
-#'                horizon = 1:12,
-#'                truth = c(3.6, 3.8, 4.1, ...))
+#'   interval_method = EmpiricalInterval(),
+#'   horizon = 1:12,
+#'   truth = c(3.6, 3.8, 4.1, ...)
+#' )
 #' }
 forecast <- function(fitted,
-                    interval_method = NoInterval(),
-                    horizon = 1L,
-                    levels = 0.95,
-                    include_median = TRUE,
-                    truth = NULL,
-                    model_name = "") {
+                     interval_method = NoInterval(),
+                     horizon = 1L,
+                     levels = 0.95,
+                     include_median = TRUE,
+                     truth = NULL,
+                     model_name = "") {
   check_setup()
 
   # Assign objects to Julia
@@ -164,9 +166,10 @@ forecast <- function(fitted,
 #' @examples
 #' \dontrun{
 #' intervals <- interval_forecast(fitted,
-#'                               method = EmpiricalInterval(),
-#'                               horizon = 1:12,
-#'                               levels = c(0.80, 0.95))
+#'   method = EmpiricalInterval(),
+#'   horizon = 1:12,
+#'   levels = c(0.80, 0.95)
+#' )
 #' }
 interval_forecast <- function(fitted, method, horizon = 1L, levels = 0.95) {
   check_setup()
@@ -225,9 +228,11 @@ TemporalInfo <- function(start = 1, resolution = 1) {
     JuliaCall::julia_assign("res_val", as.integer(resolution))
     JuliaCall::julia_eval("ForecastBaselines.TemporalInfo(start_date, Day(res_val))")
   } else {
-    JuliaCall::julia_call("ForecastBaselines.TemporalInfo",
-                         as.integer(start),
-                         as.integer(resolution))
+    JuliaCall::julia_call(
+      "ForecastBaselines.TemporalInfo",
+      as.integer(start),
+      as.integer(resolution)
+    )
   }
 }
 

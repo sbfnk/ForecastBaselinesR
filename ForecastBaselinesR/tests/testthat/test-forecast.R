@@ -130,9 +130,10 @@ test_that("forecast works with truth values", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   expect_s3_class(fc, "ForecastBaselines_Forecast")
   expect_true(!is.null(fc$truth))
@@ -149,9 +150,10 @@ test_that("forecast works with model_name", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                model_name = "TestModel")
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    model_name = "TestModel"
+  )
 
   expect_s3_class(fc, "ForecastBaselines_Forecast")
   expect_equal(fc$model_name, "TestModel")
@@ -186,9 +188,10 @@ test_that("print.ForecastBaselines_Forecast works", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                model_name = "TestModel")
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    model_name = "TestModel"
+  )
 
   expect_output(print(fc), "ForecastBaselines Forecast Object")
   expect_output(print(fc), "TestModel")

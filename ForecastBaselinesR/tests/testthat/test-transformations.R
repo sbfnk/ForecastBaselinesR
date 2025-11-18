@@ -58,7 +58,7 @@ test_that("PowerTransform works with different lambda values", {
   trans1 <- PowerTransform(lambda = 0.3)
   expect_true(!is.null(trans1))
 
-  trans2 <- PowerTransform(lambda = 1/3)
+  trans2 <- PowerTransform(lambda = 1 / 3)
   expect_true(!is.null(trans2))
 
   trans3 <- PowerTransform(lambda = 2)

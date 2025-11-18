@@ -259,7 +259,7 @@ CRPS_trajectory <- function() {
 #' @examples
 #' \dontrun{
 #' pit_values <- PIT_function(forecast)
-#' hist(pit_values)  # Should be roughly uniform
+#' hist(pit_values) # Should be roughly uniform
 #' }
 PIT_function <- function(forecast) {
   check_setup()

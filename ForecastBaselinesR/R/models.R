@@ -188,7 +188,7 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 #' model <- ARMAModel(p = 2, q = 1, s = 12)
 #' }
 ARMAModel <- function(p = 0L, q = 0L, s = 0L,
-                     include_mean = TRUE, include_drift = FALSE) {
+                      include_mean = TRUE, include_drift = FALSE) {
   check_setup()
 
   # Use keyword argument syntax for Julia
@@ -250,7 +250,7 @@ INARCHModel <- function(p = 1L) {
 #' model <- ETSModel(error_type = "M", trend_type = "M", season_type = "M", s = 12)
 #' }
 ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
-                    s = NULL, damped = FALSE) {
+                     s = NULL, damped = FALSE) {
   check_setup()
 
   # Validate inputs

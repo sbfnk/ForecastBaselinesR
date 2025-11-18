@@ -45,20 +45,22 @@ NoInterval <- function() {
 #' method <- EmpiricalInterval(n_trajectories = 2000, seed = 123)
 #'
 #' # With positivity correction for count data
-#' method <- EmpiricalInterval(n_trajectories = 1000,
-#'                            positivity_correction = "post_clip")
+#' method <- EmpiricalInterval(
+#'   n_trajectories = 1000,
+#'   positivity_correction = "post_clip"
+#' )
 #'
 #' # Return trajectories for visualization
 #' method <- EmpiricalInterval(return_trajectories = TRUE)
 #' }
 EmpiricalInterval <- function(n_trajectories = 1000L,
-                             min_observation = 1L,
-                             bootstrap_distribution = NULL,
-                             seed = NULL,
-                             positivity_correction = "none",
-                             symmetry_correction = FALSE,
-                             stepwise = FALSE,
-                             return_trajectories = FALSE) {
+                              min_observation = 1L,
+                              bootstrap_distribution = NULL,
+                              seed = NULL,
+                              positivity_correction = "none",
+                              symmetry_correction = FALSE,
+                              stepwise = FALSE,
+                              return_trajectories = FALSE) {
   check_setup()
 
   # Validate positivity_correction
@@ -154,13 +156,15 @@ ParametricInterval <- function(positivity_correction = "none") {
 #' method <- ModelTrajectoryInterval(n_trajectories = 2000, seed = 456)
 #'
 #' # Return trajectories for analysis
-#' method <- ModelTrajectoryInterval(n_trajectories = 1000,
-#'                                  return_trajectories = TRUE)
+#' method <- ModelTrajectoryInterval(
+#'   n_trajectories = 1000,
+#'   return_trajectories = TRUE
+#' )
 #' }
 ModelTrajectoryInterval <- function(n_trajectories = 1000L,
-                                   seed = NULL,
-                                   positivity_correction = "none",
-                                   return_trajectories = FALSE) {
+                                    seed = NULL,
+                                    positivity_correction = "none",
+                                    return_trajectories = FALSE) {
   check_setup()
 
   valid_pos_corr <- c("none", "post_clip", "truncate", "zero_floor")

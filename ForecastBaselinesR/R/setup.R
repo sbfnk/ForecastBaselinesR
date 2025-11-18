@@ -33,7 +33,6 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
                                     install_package = TRUE,
                                     rebuild = FALSE,
                                     verbose = TRUE) {
-
   if (verbose) {
     message("Initializing Julia...")
   }
@@ -56,21 +55,24 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
     }
 
     # Try to load the package, install if it fails
-    tryCatch({
-      JuliaCall::julia_eval("using ForecastBaselines")
-      if (verbose) {
-        message("ForecastBaselines.jl is already installed")
+    tryCatch(
+      {
+        JuliaCall::julia_eval("using ForecastBaselines")
+        if (verbose) {
+          message("ForecastBaselines.jl is already installed")
+        }
+      },
+      error = function(e) {
+        if (verbose) {
+          message("Installing ForecastBaselines.jl...")
+        }
+        JuliaCall::julia_eval('using Pkg; Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")')
+        JuliaCall::julia_eval("using ForecastBaselines")
+        if (verbose) {
+          message("ForecastBaselines.jl installed successfully")
+        }
       }
-    }, error = function(e) {
-      if (verbose) {
-        message("Installing ForecastBaselines.jl...")
-      }
-      JuliaCall::julia_eval('using Pkg; Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")')
-      JuliaCall::julia_eval("using ForecastBaselines")
-      if (verbose) {
-        message("ForecastBaselines.jl installed successfully")
-      }
-    })
+    )
   } else {
     # Just try to load
     JuliaCall::julia_eval("using ForecastBaselines")
@@ -106,6 +108,7 @@ is_setup <- function() {
 check_setup <- function() {
   if (!is_setup()) {
     stop("Julia and ForecastBaselines.jl are not set up. Please run setup_ForecastBaselines() first.",
-         call. = FALSE)
+      call. = FALSE
+    )
   }
 }

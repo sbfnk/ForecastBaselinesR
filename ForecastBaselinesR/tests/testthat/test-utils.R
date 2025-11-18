@@ -46,9 +46,10 @@ test_that("has_median checks forecast median", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                include_median = TRUE)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    include_median = TRUE
+  )
 
   result <- has_median(fc)
   expect_type(result, "logical")
@@ -82,9 +83,10 @@ test_that("has_truth checks forecast truth values", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   result <- has_truth(fc)
   expect_type(result, "logical")
@@ -140,9 +142,10 @@ test_that("add_median adds median to forecast", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                include_median = FALSE)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    include_median = FALSE
+  )
 
   fc_with_median <- add_median(fc, median_vals)
 
@@ -229,9 +232,10 @@ test_that("has_* functions handle missing components correctly", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                include_median = FALSE)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    include_median = FALSE
+  )
 
   # Should have these
   expect_true(has_horizon(fc))
@@ -253,10 +257,11 @@ test_that("truncate_horizon preserves forecast structure", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:10,
-                truth = truth_vals,
-                model_name = "TestModel")
+    interval_method = NoInterval(),
+    horizon = 1:10,
+    truth = truth_vals,
+    model_name = "TestModel"
+  )
 
   fc_truncated <- truncate_horizon(fc, max_h = 5)
 
@@ -278,10 +283,11 @@ test_that("filter_horizons preserves forecast properties", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:10,
-                truth = truth_vals,
-                model_name = "TestModel")
+    interval_method = NoInterval(),
+    horizon = 1:10,
+    truth = truth_vals,
+    model_name = "TestModel"
+  )
 
   fc_filtered <- filter_horizons(fc, horizons = c(2, 4, 6, 8))
 

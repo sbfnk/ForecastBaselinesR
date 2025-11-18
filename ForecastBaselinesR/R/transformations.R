@@ -85,7 +85,7 @@ SquareRootTransform <- function() {
 #' trans <- PowerTransform(lambda = 0.5)
 #'
 #' # Cube root
-#' trans <- PowerTransform(lambda = 1/3)
+#' trans <- PowerTransform(lambda = 1 / 3)
 #' }
 PowerTransform <- function(lambda) {
   check_setup()
@@ -114,8 +114,9 @@ PowerTransform <- function(lambda) {
 PowerPlusOneTransform <- function(lambda, constant = 1.0) {
   check_setup()
   JuliaCall::julia_call("ForecastBaselines.PowerPlusOneTransform",
-                       as.numeric(lambda),
-                       constant = as.numeric(constant))
+    as.numeric(lambda),
+    constant = as.numeric(constant)
+  )
 }
 
 #' Apply Data Transformation
@@ -150,8 +151,10 @@ transform_data <- function(x, transformation) {
 
   # Warn about SquareRootTransform bug
   if (inherits(transformation, "SquareRootTransform")) {
-    warning("SquareRootTransform has a bug in ForecastBaselines.jl. ",
-            "Use sqrt() in R instead, or PowerTransform(lambda=0.5)")
+    warning(
+      "SquareRootTransform has a bug in ForecastBaselines.jl. ",
+      "Use sqrt() in R instead, or PowerTransform(lambda=0.5)"
+    )
   }
 
   # Julia transform expects a matrix (n x 1)
@@ -218,7 +221,7 @@ inverse_transform_data <- function(y, transformation) {
 #' # This will fail - not implemented in Julia package
 #' model <- ARMAModel(p = 1, q = 1)
 #' trans <- LogTransform()
-#' transformed_model <- transform_model(model, trans)  # Error!
+#' transformed_model <- transform_model(model, trans) # Error!
 #'
 #' # Use manual transformation instead:
 #' log_data <- log(data)
@@ -229,11 +232,12 @@ inverse_transform_data <- function(y, transformation) {
 transform_model <- function(model, transformation) {
   check_setup()
   stop("transform_model() is not implemented in ForecastBaselines.jl.\n",
-       "Use manual transformation instead:\n",
-       "  1. Transform data: log_data <- log(data)\n",
-       "  2. Fit model: fitted <- fit_baseline(log_data, model)\n",
-       "  3. Forecast: fc <- forecast(fitted, ...)\n",
-       "  4. Back-transform: fc$mean <- exp(fc$mean)\n",
-       "See vignette('transformations') for details.",
-       call. = FALSE)
+    "Use manual transformation instead:\n",
+    "  1. Transform data: log_data <- log(data)\n",
+    "  2. Fit model: fitted <- fit_baseline(log_data, model)\n",
+    "  3. Forecast: fc <- forecast(fitted, ...)\n",
+    "  4. Back-transform: fc$mean <- exp(fc$mean)\n",
+    "See vignette('transformations') for details.",
+    call. = FALSE
+  )
 }

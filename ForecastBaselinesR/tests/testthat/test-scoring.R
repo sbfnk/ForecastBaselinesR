@@ -102,9 +102,10 @@ test_that("score evaluates forecast with MAE", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   mae_score <- score(fc, MAE())
 
@@ -125,9 +126,10 @@ test_that("score evaluates forecast with MSE", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   mse_score <- score(fc, MSE())
 
@@ -148,9 +150,10 @@ test_that("score evaluates forecast with RMSE", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   rmse_score <- score(fc, RMSE())
 
@@ -171,9 +174,10 @@ test_that("score evaluates forecast with Bias", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   bias_score <- score(fc, Bias())
 
@@ -193,9 +197,10 @@ test_that("score evaluates forecast with MdAE", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   mdae_score <- score(fc, MdAE())
 
@@ -217,9 +222,10 @@ test_that("score evaluates forecast with MAPE", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   mape_score <- score(fc, MAPE())
 
@@ -242,9 +248,10 @@ test_that("MAE and RMSE have expected relationship", {
   fitted <- fit_baseline(data, model)
 
   fc <- forecast(fitted,
-                interval_method = NoInterval(),
-                horizon = 1:5,
-                truth = truth_vals)
+    interval_method = NoInterval(),
+    horizon = 1:5,
+    truth = truth_vals
+  )
 
   mae_score <- score(fc, MAE())
   mse_score <- score(fc, MSE())
