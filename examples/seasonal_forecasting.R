@@ -1,7 +1,7 @@
 # Seasonal Forecasting Example
 # =============================
 
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 
 # Initialize Julia and load ForecastBaselines.jl
 setup_ForecastBaselines()

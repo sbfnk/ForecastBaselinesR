@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get up and running with ForecastBaselinesR in 5 minutes!
+Get up and running with ForecastBaselineR in 5 minutes!
 
 ## Installation (First Time Only)
 
@@ -8,11 +8,11 @@ Get up and running with ForecastBaselinesR in 5 minutes!
 # 1. Install JuliaCall
 install.packages("JuliaCall")
 
-# 2. Install ForecastBaselinesR
-devtools::install_local("/path/to/ForecastBaselinesR")
+# 2. Install ForecastBaselineR
+devtools::install_local("/path/to/ForecastBaselineR")
 
 # 3. Load and setup (this may take a few minutes the first time)
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 setup_ForecastBaselines()
 ```
 
@@ -23,7 +23,7 @@ setup_ForecastBaselines()
 ### 1. Simple Forecast
 
 ```r
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 setup_ForecastBaselines()
 
 # Your data
@@ -272,7 +272,7 @@ is_setup()
 Copy-paste this to test your installation:
 
 ```r
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 setup_ForecastBaselines()
 
 set.seed(123)

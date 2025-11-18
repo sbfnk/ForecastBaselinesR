@@ -4,7 +4,7 @@
 #' @importFrom JuliaCall julia_setup julia_eval julia_call julia_assign
 .onLoad <- function(libname, pkgname) {
   # This will be called when the package is loaded
-  packageStartupMessage("ForecastBaselinesR: R interface to ForecastBaselines.jl")
+  packageStartupMessage("ForecastBaselineR: R interface to ForecastBaselines.jl")
   packageStartupMessage("Please run setup_ForecastBaselines() to initialize Julia and load the package")
 }
 
@@ -77,7 +77,7 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
   }
 
   if (verbose) {
-    message("ForecastBaselinesR setup complete!")
+    message("ForecastBaselineR setup complete!")
   }
 
   invisible(TRUE)

@@ -1,7 +1,7 @@
-# Basic Usage Example for ForecastBaselinesR
+# Basic Usage Example for ForecastBaselineR
 # ==========================================
 
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 
 # Initialize Julia and load ForecastBaselines.jl
 setup_ForecastBaselines()

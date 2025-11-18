@@ -1,12 +1,12 @@
-# Installation Guide for ForecastBaselinesR
+# Installation Guide for ForecastBaselineR
 
-This guide will walk you through installing ForecastBaselinesR and its dependencies.
+This guide will walk you through installing ForecastBaselineR and its dependencies.
 
 ## Prerequisites
 
 ### 1. Install Julia
 
-ForecastBaselinesR requires Julia (version 1.9 or higher) to be installed on your system.
+ForecastBaselineR requires Julia (version 1.9 or higher) to be installed on your system.
 
 #### On Linux/macOS:
 
@@ -38,7 +38,7 @@ julia --version
 
 ### 2. Install R
 
-ForecastBaselinesR requires R version 3.5.0 or higher.
+ForecastBaselineR requires R version 3.5.0 or higher.
 
 Download and install R from [CRAN](https://cran.r-project.org/).
 
@@ -46,7 +46,7 @@ Download and install R from [CRAN](https://cran.r-project.org/).
 
 Download and install RStudio from [posit.co](https://posit.co/downloads/).
 
-## Installing ForecastBaselinesR
+## Installing ForecastBaselineR
 
 ### Step 1: Install JuliaCall
 
@@ -56,7 +56,7 @@ Open R or RStudio and run:
 install.packages("JuliaCall")
 ```
 
-### Step 2: Install ForecastBaselinesR
+### Step 2: Install ForecastBaselineR
 
 #### Option A: Install from local directory
 
@@ -65,21 +65,21 @@ install.packages("JuliaCall")
 if (!require("devtools")) install.packages("devtools")
 
 # Install from local directory
-devtools::install_local("/path/to/ForecastBaselinesR")
+devtools::install_local("/path/to/ForecastBaselineR")
 ```
 
-Replace `/path/to/ForecastBaselinesR` with the actual path to the package directory.
+Replace `/path/to/ForecastBaselineR` with the actual path to the package directory.
 
-#### Option B: Install from GitHub (when available)
+#### Option B: Install from GitHub
 
 ```r
-devtools::install_github("ManuelStapper/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
+devtools::install_github("sbfnk/ForecastBaselineR")
 ```
 
 ### Step 3: Load and Setup
 
 ```r
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 
 # Initialize Julia and install/load ForecastBaselines.jl
 setup_ForecastBaselines()
@@ -98,7 +98,7 @@ This command will:
 Run a simple test to verify everything is working:
 
 ```r
-library(ForecastBaselinesR)
+library(ForecastBaselineR)
 setup_ForecastBaselines()
 
 # Create simple data
