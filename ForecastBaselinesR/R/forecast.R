@@ -113,35 +113,40 @@ forecast <- function(fitted,
   JuliaCall::julia_assign("fitted_obj", fitted)
   JuliaCall::julia_assign("interval_method_obj", interval_method)
   JuliaCall::julia_assign("h", as.integer(horizon))
-  JuliaCall::julia_assign("lvls", as.numeric(levels))
+  # Ensure levels is always a vector in Julia
+  if (length(levels) == 1) {
+    # For single values, create Julia vector directly
+    JuliaCall::julia_command(sprintf("lvls = [%f]", as.numeric(levels)))
+  } else {
+    # For multiple values, assign and convert
+    JuliaCall::julia_assign("lvls_temp", as.numeric(levels))
+    JuliaCall::julia_command("lvls = vec(lvls_temp)")
+  }
   JuliaCall::julia_assign("inc_median", include_median)
   JuliaCall::julia_assign("mdl_name", as.character(model_name))
 
-  # Build the forecast call
+  # Build the forecast call and convert using Julia helper
+  # Note: Julia code must be on a single line to avoid parse errors
+  # Generate a unique ID for this forecast object
+  fc_id <- paste0("fc_", sample.int(.Machine$integer.max, 1))
+
   if (is.null(truth)) {
-    forecast_result <- JuliaCall::julia_eval("
-      ForecastBaselines.forecast(fitted_obj;
-        interval_method = interval_method_obj,
-        horizon = h,
-        levels = lvls,
-        include_median = inc_median,
-        model_name = mdl_name)
-    ")
+    julia_cmd <- sprintf("%s = ForecastBaselines.forecast(fitted_obj; interval_method = interval_method_obj, horizon = h, levels = lvls, include_median = inc_median, model_name = mdl_name)", fc_id)
+    JuliaCall::julia_command(julia_cmd)
+    forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
   } else {
     JuliaCall::julia_assign("truth_vals", as.numeric(truth))
-    forecast_result <- JuliaCall::julia_eval("
-      ForecastBaselines.forecast(fitted_obj;
-        interval_method = interval_method_obj,
-        horizon = h,
-        levels = lvls,
-        include_median = inc_median,
-        truth = truth_vals,
-        model_name = mdl_name)
-    ")
+    julia_cmd <- sprintf("%s = ForecastBaselines.forecast(fitted_obj; interval_method = interval_method_obj, horizon = h, levels = lvls, include_median = inc_median, truth = truth_vals, model_name = mdl_name)", fc_id)
+    JuliaCall::julia_command(julia_cmd)
+    forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
   }
 
-  # Convert to R-friendly format
-  convert_forecast_to_r(forecast_result)
+  # Store the Julia variable name for later use (e.g., in score())
+  attr(forecast_result, "julia_ref") <- fc_id
+
+  # Add S3 class
+  class(forecast_result) <- c("ForecastBaselines_Forecast", "list")
+  forecast_result
 }
 
 #' Generate Interval Forecasts
@@ -169,19 +174,23 @@ interval_forecast <- function(fitted, method, horizon = 1L, levels = 0.95) {
   JuliaCall::julia_assign("fitted_obj", fitted)
   JuliaCall::julia_assign("method_obj", method)
   JuliaCall::julia_assign("h", as.integer(horizon))
-  JuliaCall::julia_assign("lvls", as.numeric(levels))
+  # Ensure levels is always a vector in Julia
+  if (length(levels) == 1) {
+    # For single values, create Julia vector directly
+    JuliaCall::julia_command(sprintf("lvls = [%f]", as.numeric(levels)))
+  } else {
+    # For multiple values, assign and convert
+    JuliaCall::julia_assign("lvls_temp", as.numeric(levels))
+    JuliaCall::julia_command("lvls = vec(lvls_temp)")
+  }
 
   result <- JuliaCall::julia_eval("
-    ForecastBaselines.interval_forecast(fitted_obj, method_obj, h, lvls)
+    res = ForecastBaselines.interval_forecast(fitted_obj, method_obj, h, lvls)
+    interval_result_to_r_dict(res)
   ")
 
-  # Convert to R list
-  list(
-    point = as.numeric(result[[1]]),
-    median = as.numeric(result[[2]]),
-    intervals = result[[3]],
-    trajectories = result[[4]]
-  )
+  # Already converted by Julia helper
+  result
 }
 
 #' Create Temporal Information Object
@@ -209,9 +218,12 @@ TemporalInfo <- function(start = 1, resolution = 1) {
   if (inherits(start, "Date")) {
     start_str <- format(start, "%Y-%m-%d")
     JuliaCall::julia_assign("start_val", start_str)
+    # Import Dates module and create Date
+    JuliaCall::julia_eval("using Dates")
     JuliaCall::julia_eval("start_date = Date(start_val)")
+    # Convert integer resolution to Day period
     JuliaCall::julia_assign("res_val", as.integer(resolution))
-    JuliaCall::julia_eval("ForecastBaselines.TemporalInfo(start_date, res_val)")
+    JuliaCall::julia_eval("ForecastBaselines.TemporalInfo(start_date, Day(res_val))")
   } else {
     JuliaCall::julia_call("ForecastBaselines.TemporalInfo",
                          as.integer(start),
@@ -219,52 +231,19 @@ TemporalInfo <- function(start = 1, resolution = 1) {
   }
 }
 
-# Internal helper function to convert Julia Forecast to R list
+# Internal helper function - no longer needed, conversion done inline
+# Kept for backwards compatibility
 convert_forecast_to_r <- function(jl_forecast) {
-  # Extract components using Julia field access
-  JuliaCall::julia_assign("fc", jl_forecast)
+  # If already converted (from new inline approach), just return
+  if (is.list(jl_forecast)) {
+    class(jl_forecast) <- c("ForecastBaselines_Forecast", "list")
+    return(jl_forecast)
+  }
 
-  horizon <- tryCatch({
-    as.integer(JuliaCall::julia_eval("fc.horizon"))
-  }, error = function(e) NULL)
-
-  mean <- tryCatch({
-    as.numeric(JuliaCall::julia_eval("fc.mean"))
-  }, error = function(e) NULL)
-
-  median <- tryCatch({
-    as.numeric(JuliaCall::julia_eval("fc.median"))
-  }, error = function(e) NULL)
-
-  intervals <- tryCatch({
-    JuliaCall::julia_eval("fc.intervals")
-  }, error = function(e) NULL)
-
-  truth <- tryCatch({
-    as.numeric(JuliaCall::julia_eval("fc.truth"))
-  }, error = function(e) NULL)
-
-  trajectories <- tryCatch({
-    JuliaCall::julia_eval("fc.trajectories")
-  }, error = function(e) NULL)
-
-  model_name <- tryCatch({
-    as.character(JuliaCall::julia_eval("fc.model_name"))
-  }, error = function(e) "")
-
-  # Create R list
-  result <- list(
-    horizon = horizon,
-    mean = mean,
-    median = median,
-    intervals = intervals,
-    truth = truth,
-    trajectories = trajectories,
-    model_name = model_name
-  )
-
-  class(result) <- c("ForecastBaselines_Forecast", "list")
-  result
+  # Fallback: shouldn't reach here with new approach
+  warning("Using deprecated conversion path")
+  class(jl_forecast) <- c("ForecastBaselines_Forecast", "list")
+  jl_forecast
 }
 
 #' Print method for Forecast objects

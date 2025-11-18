@@ -128,17 +128,37 @@ PowerPlusOneTransform <- function(lambda, constant = 1.0) {
 #' @return Transformed numeric vector
 #' @export
 #'
+#' @details
+#' **Recommended:** Use R's built-in transformation functions instead for
+#' better reliability and flexibility. This function has limitations due to
+#' bugs in ForecastBaselines.jl (e.g., SquareRootTransform fails).
+#'
+#' See `vignette("transformations")` for the recommended R approach.
+#'
 #' @examples
 #' \dontrun{
+#' # Julia approach (limited):
 #' data <- c(1, 2, 3, 4, 5)
 #' trans <- LogTransform()
 #' transformed <- transform_data(data, trans)
+#'
+#' # Recommended R approach:
+#' transformed <- log(data)
 #' }
 transform_data <- function(x, transformation) {
   check_setup()
-  JuliaCall::julia_assign("x_data", as.numeric(x))
+
+  # Warn about SquareRootTransform bug
+  if (inherits(transformation, "SquareRootTransform")) {
+    warning("SquareRootTransform has a bug in ForecastBaselines.jl. ",
+            "Use sqrt() in R instead, or PowerTransform(lambda=0.5)")
+  }
+
+  # Julia transform expects a matrix (n x 1)
+  x_mat <- matrix(as.numeric(x), ncol = 1)
+  JuliaCall::julia_assign("x_mat", x_mat)
   JuliaCall::julia_assign("trans_obj", transformation)
-  result <- JuliaCall::julia_eval("ForecastBaselines.transform(x_data, trans_obj)")
+  result <- JuliaCall::julia_eval("ForecastBaselines.transform(x_mat, trans_obj)")
   as.numeric(result)
 }
 
@@ -160,16 +180,16 @@ transform_data <- function(x, transformation) {
 #' }
 inverse_transform_data <- function(y, transformation) {
   check_setup()
-  JuliaCall::julia_assign("y_data", as.numeric(y))
+  # Julia inverse_transform expects a vector (unlike transform which needs a matrix)
+  JuliaCall::julia_assign("y_vec", as.numeric(y))
   JuliaCall::julia_assign("trans_obj", transformation)
-  result <- JuliaCall::julia_eval("ForecastBaselines.inverse_transform(y_data, trans_obj)")
+  result <- JuliaCall::julia_eval("ForecastBaselines.inverse_transform(y_vec, trans_obj)")
   as.numeric(result)
 }
 
 #' Apply Transformation to Model
 #'
-#' Wraps a model with a data transformation. The model will be fit to
-#' transformed data and forecasts will be back-transformed automatically.
+#' Wraps a model with a data transformation.
 #'
 #' @param model A model object
 #' @param transformation A transformation object
@@ -177,17 +197,43 @@ inverse_transform_data <- function(y, transformation) {
 #' @return A transformed model object
 #' @export
 #'
+#' @details
+#' **Not Implemented:** This function does not work because ForecastBaselines.jl
+#' does not implement `transform()` for model types.
+#'
+#' **Recommended approach:** Transform your data manually in R before fitting:
+#'
+#' ```r
+#' # Instead of transform_model():
+#' log_data <- log(data)
+#' fitted <- fit_baseline(log_data, model)
+#' fc <- forecast(fitted, ...)
+#' fc$mean <- exp(fc$mean)  # Back-transform
+#' ```
+#'
+#' See `vignette("transformations")` for complete examples.
+#'
 #' @examples
 #' \dontrun{
-#' # Fit ARMA model to log-transformed data
+#' # This will fail - not implemented in Julia package
 #' model <- ARMAModel(p = 1, q = 1)
 #' trans <- LogTransform()
-#' transformed_model <- transform_model(model, trans)
-#' fitted <- fit_baseline(data, transformed_model)
+#' transformed_model <- transform_model(model, trans)  # Error!
+#'
+#' # Use manual transformation instead:
+#' log_data <- log(data)
+#' fitted <- fit_baseline(log_data, model)
+#' fc <- forecast(fitted, interval_method = NoInterval(), horizon = 1:5)
+#' fc$mean <- exp(fc$mean)
 #' }
 transform_model <- function(model, transformation) {
   check_setup()
-  JuliaCall::julia_assign("model_obj", model)
-  JuliaCall::julia_assign("trans_obj", transformation)
-  JuliaCall::julia_eval("ForecastBaselines.transform(model_obj, trans_obj)")
+  stop("transform_model() is not implemented in ForecastBaselines.jl.\n",
+       "Use manual transformation instead:\n",
+       "  1. Transform data: log_data <- log(data)\n",
+       "  2. Fit model: fitted <- fit_baseline(log_data, model)\n",
+       "  3. Forecast: fc <- forecast(fitted, ...)\n",
+       "  4. Back-transform: fc$mean <- exp(fc$mean)\n",
+       "See vignette('transformations') for details.",
+       call. = FALSE)
 }

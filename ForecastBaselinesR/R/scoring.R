@@ -22,18 +22,17 @@
 score <- function(forecast, rule) {
   check_setup()
 
-  # Convert R forecast back to Julia if needed
-  if (inherits(forecast, "ForecastBaselines_Forecast")) {
-    # Reconstruct Julia forecast object
-    JuliaCall::julia_assign("fc_r", forecast)
-    # For now, assume it's already a Julia object stored in fc variable
-    JuliaCall::julia_assign("fc", forecast)
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(attr(forecast, "julia_ref"))) {
+    fc_var <- attr(forecast, "julia_ref")
+    JuliaCall::julia_assign("rule_obj", rule)
+    as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.score(%s, rule_obj)", fc_var)))
   } else {
+    # Fallback: try to assign as-is (may not work for converted objects)
     JuliaCall::julia_assign("fc", forecast)
+    JuliaCall::julia_assign("rule_obj", rule)
+    as.numeric(JuliaCall::julia_eval("ForecastBaselines.score(fc, rule_obj)"))
   }
-
-  JuliaCall::julia_assign("rule_obj", rule)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.score(fc, rule_obj)"))
 }
 
 # Point Forecast Scoring Rules
@@ -203,8 +202,9 @@ WIS <- function(weights = NULL) {
   if (is.null(weights)) {
     JuliaCall::julia_eval("ForecastBaselines.WIS()")
   } else {
+    # WIS expects keyword arguments, using level_weights
     JuliaCall::julia_assign("wts", as.numeric(weights))
-    JuliaCall::julia_eval("ForecastBaselines.WIS(wts)")
+    JuliaCall::julia_eval("ForecastBaselines.WIS(level_weights=wts)")
   }
 }
 
@@ -263,8 +263,16 @@ CRPS_trajectory <- function() {
 #' }
 PIT_function <- function(forecast) {
   check_setup()
-  JuliaCall::julia_assign("fc", forecast)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.PIT_function(fc)"))
+
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(attr(forecast, "julia_ref"))) {
+    fc_var <- attr(forecast, "julia_ref")
+    as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.PIT_function(%s)", fc_var)))
+  } else {
+    # Fallback
+    JuliaCall::julia_assign("fc", forecast)
+    as.numeric(JuliaCall::julia_eval("ForecastBaselines.PIT_function(fc)"))
+  }
 }
 
 #' Cramér-von Mises Divergence
@@ -284,6 +292,14 @@ PIT_function <- function(forecast) {
 #' }
 CvM_divergence <- function(forecast) {
   check_setup()
-  JuliaCall::julia_assign("fc", forecast)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.CvM_divergence(fc)"))
+
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(attr(forecast, "julia_ref"))) {
+    fc_var <- attr(forecast, "julia_ref")
+    as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.CvM_divergence(%s)", fc_var)))
+  } else {
+    # Fallback
+    JuliaCall::julia_assign("fc", forecast)
+    as.numeric(JuliaCall::julia_eval("ForecastBaselines.CvM_divergence(fc)"))
+  }
 }

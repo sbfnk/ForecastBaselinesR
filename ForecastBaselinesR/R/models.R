@@ -36,7 +36,8 @@ MarginalModel <- function(p = NULL) {
   if (is.null(p)) {
     JuliaCall::julia_eval("ForecastBaselines.MarginalModel()")
   } else {
-    JuliaCall::julia_call("ForecastBaselines.MarginalModel", as.integer(p))
+    JuliaCall::julia_assign("p_val", as.integer(p))
+    JuliaCall::julia_eval("ForecastBaselines.MarginalModel(p=p_val)")
   }
 }
 
@@ -57,11 +58,8 @@ MarginalModel <- function(p = NULL) {
 #' }
 KDEModel <- function(bandwidth = NULL, kernel = "gaussian") {
   check_setup()
-  if (is.null(bandwidth)) {
-    JuliaCall::julia_eval("ForecastBaselines.KDEModel()")
-  } else {
-    JuliaCall::julia_call("ForecastBaselines.KDEModel", bandwidth)
-  }
+  # KDEModel in Julia doesn't take parameters, ignoring bandwidth for now
+  JuliaCall::julia_eval("ForecastBaselines.KDEModel()")
 }
 
 #' Last Similar Dates (LSD) Model
@@ -85,10 +83,10 @@ KDEModel <- function(bandwidth = NULL, kernel = "gaussian") {
 #' }
 LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.LSDModel",
-                       as.integer(s),
-                       as.integer(window_width),
-                       trend_correction)
+  # Julia API uses 's' and 'w' parameters, trend_correction not supported
+  JuliaCall::julia_assign("s_val", as.integer(s))
+  JuliaCall::julia_assign("w_val", as.integer(window_width))
+  JuliaCall::julia_eval("ForecastBaselines.LSDModel(s=s_val, w=w_val)")
 }
 
 #' OLS Model
@@ -109,15 +107,12 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 #' # Quadratic trend with seasonality
 #' model <- OLSModel(degree = 2, s = 12)
 #' }
-OLSModel <- function(degree = 1L, s = NULL) {
+OLSModel <- function(degree = 1L, differencing = 0L) {
   check_setup()
-  if (is.null(s)) {
-    JuliaCall::julia_call("ForecastBaselines.OLSModel", as.integer(degree))
-  } else {
-    JuliaCall::julia_call("ForecastBaselines.OLSModel",
-                         as.integer(degree),
-                         as.integer(s))
-  }
+  # Julia API uses 'p' (polynomial degree) and 'd' (differencing)
+  JuliaCall::julia_assign("p_val", as.integer(degree))
+  JuliaCall::julia_assign("d_val", as.integer(differencing))
+  JuliaCall::julia_eval("ForecastBaselines.OLSModel(p=p_val, d=d_val)")
 }
 
 #' IDS Model
@@ -137,9 +132,9 @@ OLSModel <- function(degree = 1L, s = NULL) {
 #' }
 IDSModel <- function(threshold = 0.0, window_size = 3L) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.IDSModel",
-                       threshold,
-                       as.integer(window_size))
+  # Julia API only takes 'p' parameter
+  JuliaCall::julia_assign("p_val", as.integer(window_size))
+  JuliaCall::julia_eval("ForecastBaselines.IDSModel(p=p_val)")
 }
 
 #' STL Model
@@ -163,10 +158,9 @@ IDSModel <- function(threshold = 0.0, window_size = 3L) {
 #' }
 STLModel <- function(s, trend = TRUE, robust = FALSE) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.STLModel",
-                       as.integer(s),
-                       trend,
-                       robust)
+  # Julia API only takes 's' parameter, trend and robust not supported
+  JuliaCall::julia_assign("s_val", as.integer(s))
+  JuliaCall::julia_eval("ForecastBaselines.STLModel(s=s_val)")
 }
 
 #' ARMA Model
@@ -196,12 +190,16 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 ARMAModel <- function(p = 0L, q = 0L, s = 0L,
                      include_mean = TRUE, include_drift = FALSE) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.ARMAModel",
-                       as.integer(p),
-                       as.integer(q),
-                       as.integer(s),
-                       include_mean,
-                       include_drift)
+
+  # Use keyword argument syntax for Julia
+  JuliaCall::julia_assign("p_val", as.integer(p))
+  JuliaCall::julia_assign("q_val", as.integer(p))
+  JuliaCall::julia_assign("s_val", as.integer(s))
+
+  # For now, use simple keyword argument approach
+  # Note: include_mean and include_drift may not be directly supported
+  # They may need to be handled differently in Julia API
+  JuliaCall::julia_eval("ForecastBaselines.ARMAModel(p=p_val, q=q_val, s=s_val)")
 }
 
 #' INARCH Model
@@ -219,7 +217,8 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L,
 #' }
 INARCHModel <- function(p = 1L) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.INARCHModel", as.integer(p))
+  JuliaCall::julia_assign("p_val", as.integer(p))
+  JuliaCall::julia_eval("ForecastBaselines.INARCHModel(p=p_val)")
 }
 
 #' ETS Model
@@ -273,13 +272,19 @@ ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
     stop("Seasonal period 's' must be provided when season_type is not 'N'")
   }
 
-  # Construct model string
-  model_str <- paste0(error_type, trend_type, season_type)
-
-  # Call Julia function
+  # Call Julia function using keyword arguments with String values
   if (is.null(s)) {
-    JuliaCall::julia_call("ForecastBaselines.ETSModel", model_str)
+    julia_code <- sprintf(
+      'ForecastBaselines.ETSModel(error="%s", trend="%s", season="%s")',
+      error_type, trend_type, season_type
+    )
   } else {
-    JuliaCall::julia_call("ForecastBaselines.ETSModel", model_str, as.integer(s))
+    JuliaCall::julia_assign("s_val", as.integer(s))
+    julia_code <- sprintf(
+      'ForecastBaselines.ETSModel(error="%s", trend="%s", season="%s", s=s_val)',
+      error_type, trend_type, season_type
+    )
   }
+
+  JuliaCall::julia_eval(julia_code)
 }

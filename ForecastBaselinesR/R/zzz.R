@@ -76,6 +76,17 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
     JuliaCall::julia_eval("using ForecastBaselines")
   }
 
+  # Load helper functions for R conversion
+  if (verbose) {
+    message("Loading R conversion helpers...")
+  }
+  helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
+  if (file.exists(helper_file)) {
+    JuliaCall::julia_command(sprintf('include("%s")', helper_file))
+  } else {
+    warning("Could not find forecast_helpers.jl - some functions may not work correctly")
+  }
+
   if (verbose) {
     message("ForecastBaselinesR setup complete!")
   }
