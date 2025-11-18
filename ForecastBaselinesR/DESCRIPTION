@@ -18,5 +18,5 @@ Imports:
     JuliaCall (>= 0.17.0)
 SystemRequirements: Julia (>= 1.9)
 RoxygenNote: 7.0.0
-URL: https://github.com/sbfnk/ForecastBaselines.jl
-BugReports: https://github.com/sbfnk/ForecastBaselines.jl/issues
+URL: https://github.com/ManuelStapper/ForecastBaselines.jl
+BugReports: https://github.com/ManuelStapper/ForecastBaselines.jl/issues

@@ -73,7 +73,7 @@ Replace `/path/to/ForecastBaselinesR` with the actual path to the package direct
 #### Option B: Install from GitHub (when available)
 
 ```r
-devtools::install_github("sbfnk/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
+devtools::install_github("ManuelStapper/ForecastBaselines.jl", subdir = "ForecastBaselinesR")
 ```
 
 ### Step 3: Load and Setup
@@ -143,7 +143,7 @@ C:/Users/YourUsername/AppData/Local/Programs/Julia-1.x.x/bin
 2. Run:
 ```julia
 using Pkg
-Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")
+Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")
 ```
 
 3. Then in R:
@@ -167,7 +167,7 @@ In Julia, run:
 ```julia
 ENV["JULIA_DEPOT_PATH"] = expanduser("~/.julia")
 using Pkg
-Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")
+Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")
 ```
 
 ### Problem: Slow first run
@@ -182,7 +182,7 @@ In Julia:
 ```julia
 using Pkg
 Pkg.activate("forecastenv")
-Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")
+Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")
 ```
 
 Then in R:
@@ -209,7 +209,7 @@ source("examples/seasonal_forecasting.R")
 If you encounter issues not covered here:
 
 1. Check the [README](README.md) for usage examples
-2. Open an issue on [GitHub](https://github.com/sbfnk/ForecastBaselines.jl/issues)
+2. Open an issue on [GitHub](https://github.com/ManuelStapper/ForecastBaselines.jl/issues)
 3. Check the [JuliaCall documentation](https://non-contradiction.github.io/JuliaCall/)
 
 ## Next Steps

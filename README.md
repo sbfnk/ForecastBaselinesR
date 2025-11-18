@@ -191,7 +191,7 @@ If you use this package in your research, please cite:
 @software{forecastbaselines,
   title = {ForecastBaselinesR: Baseline Forecasting Models for R},
   year = {2024},
-  url = {https://github.com/sbfnk/ForecastBaselines.jl}
+  url = {https://github.com/ManuelStapper/ForecastBaselines.jl}
 }
 ```
 
@@ -201,7 +201,7 @@ Contributions are welcome! Please open an issue or pull request on GitHub.
 
 ## Support
 
-For bugs and feature requests, please open an issue on [GitHub](https://github.com/sbfnk/ForecastBaselines.jl/issues).
+For bugs and feature requests, please open an issue on [GitHub](https://github.com/ManuelStapper/ForecastBaselines.jl/issues).
 
 ## Getting Started
 

@@ -65,7 +65,7 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
       if (verbose) {
         message("Installing ForecastBaselines.jl...")
       }
-      JuliaCall::julia_eval('using Pkg; Pkg.add(url="https://github.com/sbfnk/ForecastBaselines.jl")')
+      JuliaCall::julia_eval('using Pkg; Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")')
       JuliaCall::julia_eval("using ForecastBaselines")
       if (verbose) {
         message("ForecastBaselines.jl installed successfully")
