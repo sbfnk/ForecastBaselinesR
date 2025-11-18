@@ -111,10 +111,18 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 #' }
 OLSModel <- function(degree = 1L, d = 0L) {
   check_setup()
-  JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.OLSModel(p=%d, d=%d)",
-    as.integer(degree), as.integer(d)
-  ))
+  # Only pass d parameter if it's non-zero
+  if (d == 0) {
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.OLSModel(p=%d)",
+      as.integer(degree)
+    ))
+  } else {
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.OLSModel(p=%d, d=%d)",
+      as.integer(degree), as.integer(d)
+    ))
+  }
 }
 
 #' IDS Model
@@ -192,15 +200,18 @@ STLModel <- function(s, trend = TRUE, robust = FALSE) {
 ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = identity) {
   check_setup()
 
-  # Convert trend function to Julia
-  if (identical(trend, identity)) {
-    # identity is a built-in Julia function, no quotes needed
+  # For now, we don't pass the trend parameter as the Julia package
+  # may have a different interface than initially documented
+  if (s == 0) {
     JuliaCall::julia_eval(sprintf(
-      "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d, trend=identity)",
-      as.integer(p), as.integer(q), as.integer(s)
+      "ForecastBaselines.ARMAModel(p=%d, q=%d)",
+      as.integer(p), as.integer(q)
     ))
   } else {
-    stop("Only identity trend function is currently supported")
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d)",
+      as.integer(p), as.integer(q), as.integer(s)
+    ))
   }
 }
 
