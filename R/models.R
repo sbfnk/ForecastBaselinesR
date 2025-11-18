@@ -36,7 +36,10 @@ MarginalModel <- function(p = NULL) {
   if (is.null(p)) {
     JuliaCall::julia_eval("ForecastBaselines.MarginalModel()")
   } else {
-    JuliaCall::julia_call("ForecastBaselines.MarginalModel", as.integer(p))
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.MarginalModel(p=%d)",
+      as.integer(p)
+    ))
   }
 }
 
@@ -85,10 +88,11 @@ KDEModel <- function(bandwidth = NULL, kernel = "gaussian") {
 #' }
 LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.LSDModel",
-                       as.integer(s),
-                       as.integer(window_width),
-                       trend_correction)
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.LSDModel(s=%d, w=%d)",
+    as.integer(s),
+    as.integer(window_width)
+  ))
 }
 
 #' OLS Model
@@ -144,9 +148,10 @@ OLSModel <- function(degree = 1L, n_obs = NULL) {
 #' }
 IDSModel <- function(threshold = 0.0, window_size = 3L) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.IDSModel",
-                       threshold,
-                       as.integer(window_size))
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.IDSModel(p=%d)",
+    as.integer(window_size)
+  ))
 }
 
 #' STL Model
@@ -170,10 +175,10 @@ IDSModel <- function(threshold = 0.0, window_size = 3L) {
 #' }
 STLModel <- function(s, trend = TRUE, robust = FALSE) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.STLModel",
-                       as.integer(s),
-                       trend,
-                       robust)
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.STLModel(s=%d)",
+    as.integer(s)
+  ))
 }
 
 #' ARMA Model
@@ -228,7 +233,10 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = FALSE) {
 #' }
 INARCHModel <- function(p = 1L) {
   check_setup()
-  JuliaCall::julia_call("ForecastBaselines.INARCHModel", as.integer(p))
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.INARCHModel(p=%d)",
+    as.integer(p)
+  ))
 }
 
 #' ETS Model
@@ -282,13 +290,21 @@ ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
     stop("Seasonal period 's' must be provided when season_type is not 'N'")
   }
 
-  # Construct model string
-  model_str <- paste0(error_type, trend_type, season_type)
+  # Convert types to Julia symbols
+  error_sym <- sprintf(":%s", error_type)
+  trend_sym <- sprintf(":%s", trend_type)
+  season_sym <- sprintf(":%s", season_type)
 
-  # Call Julia function
+  # Call Julia function with keyword arguments
   if (is.null(s)) {
-    JuliaCall::julia_call("ForecastBaselines.ETSModel", model_str)
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.ETSModel(error=%s, trend=%s, season=%s)",
+      error_sym, trend_sym, season_sym
+    ))
   } else {
-    JuliaCall::julia_call("ForecastBaselines.ETSModel", model_str, as.integer(s))
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.ETSModel(error=%s, trend=%s, season=%s, s=%d)",
+      error_sym, trend_sym, season_sym, as.integer(s)
+    ))
   }
 }
