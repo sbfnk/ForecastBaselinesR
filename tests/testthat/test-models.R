@@ -82,8 +82,8 @@ test_that("ETSModel can be created with different specifications", {
 test_that("STLModel requires seasonality parameter", {
   skip_if_no_julia()
 
-  # Create seasonal data with at least 3 full seasonal cycles
-  seasonal_data <- sin(2 * pi * (1:72) / 12) * 2 + (1:72) * 0.1 + 10
+  # Create seasonal data with at least 13 full seasonal cycles (STL default requirement)
+  seasonal_data <- sin(2 * pi * (1:168) / 12) * 2 + (1:168) * 0.1 + 10
 
   model <- STLModel(s = 12)
   expect_true(!is.null(model))

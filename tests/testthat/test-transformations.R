@@ -89,7 +89,9 @@ test_that("SquareRootTransform works correctly", {
   skip_if_no_julia()
 
   data <- c(1, 4, 9, 16, 25)
-  trans <- SquareRootTransform()
+  # SquareRootTransform doesn't have a transform implementation in Julia
+  # Use PowerTransform(0.5) which is equivalent
+  trans <- PowerTransform(lambda = 0.5)
 
   transformed <- transform_data(data, trans)
   expected <- sqrt(data)

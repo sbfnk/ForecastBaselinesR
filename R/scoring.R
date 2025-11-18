@@ -262,8 +262,17 @@ CRPS_trajectory <- function() {
 #' }
 PIT_function <- function(forecast) {
   check_setup()
-  JuliaCall::julia_assign("fc", forecast)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.PIT_function(fc)"))
+
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(forecast$.julia_ref)) {
+    fc_var <- forecast$.julia_ref
+  } else {
+    # Fallback: assign the forecast object directly
+    JuliaCall::julia_assign("fc_temp", forecast)
+    fc_var <- "fc_temp"
+  }
+
+  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.PIT_function(%s)", fc_var)))
 }
 
 #' Cramér-von Mises Divergence
@@ -283,6 +292,15 @@ PIT_function <- function(forecast) {
 #' }
 CvM_divergence <- function(forecast) {
   check_setup()
-  JuliaCall::julia_assign("fc", forecast)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.CvM_divergence(fc)"))
+
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(forecast$.julia_ref)) {
+    fc_var <- forecast$.julia_ref
+  } else {
+    # Fallback: assign the forecast object directly
+    JuliaCall::julia_assign("fc_temp", forecast)
+    fc_var <- "fc_temp"
+  }
+
+  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.CvM_divergence(%s)", fc_var)))
 }
