@@ -285,21 +285,21 @@ ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
     stop("Seasonal period 's' must be provided when season_type is not 'N'")
   }
 
-  # Convert types to Julia symbols
-  error_sym <- sprintf(":%s", error_type)
-  trend_sym <- sprintf(":%s", trend_type)
-  season_sym <- sprintf(":%s", season_type)
+  # Convert types to Julia strings
+  error_str <- sprintf('"%s"', error_type)
+  trend_str <- sprintf('"%s"', trend_type)
+  season_str <- sprintf('"%s"', season_type)
 
   # Call Julia function with keyword arguments
   if (is.null(s)) {
     JuliaCall::julia_eval(sprintf(
       "ForecastBaselines.ETSModel(error=%s, trend=%s, season=%s)",
-      error_sym, trend_sym, season_sym
+      error_str, trend_str, season_str
     ))
   } else {
     JuliaCall::julia_eval(sprintf(
       "ForecastBaselines.ETSModel(error=%s, trend=%s, season=%s, s=%d)",
-      error_sym, trend_sym, season_sym, as.integer(s)
+      error_str, trend_str, season_str, as.integer(s)
     ))
   }
 }

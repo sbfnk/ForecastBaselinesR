@@ -225,6 +225,11 @@ TemporalInfo <- function(start = 1, resolution = 1) {
 
 # Internal helper function to convert Julia Forecast to R list
 convert_forecast_to_r <- function(jl_forecast) {
+  # Store Julia forecast in a persistent variable for later use (e.g., scoring)
+  # Use a unique identifier
+  fc_id <- paste0("__fc_", as.integer(Sys.time() * 1000000) %% 1000000)
+  JuliaCall::julia_assign(fc_id, jl_forecast)
+
   # Extract components using Julia field access
   JuliaCall::julia_assign("fc", jl_forecast)
 
@@ -264,7 +269,8 @@ convert_forecast_to_r <- function(jl_forecast) {
     intervals = intervals,
     truth = truth,
     trajectories = trajectories,
-    model_name = model_name
+    model_name = model_name,
+    .julia_ref = fc_id  # Store Julia reference for scoring
   )
 
   class(result) <- c("ForecastBaselines_Forecast", "list")

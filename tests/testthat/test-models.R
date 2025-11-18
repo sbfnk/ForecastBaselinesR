@@ -82,8 +82,8 @@ test_that("ETSModel can be created with different specifications", {
 test_that("STLModel requires seasonality parameter", {
   skip_if_no_julia()
 
-  # Create seasonal data
-  seasonal_data <- sin(2 * pi * (1:48) / 12) * 2 + (1:48) * 0.1 + 10
+  # Create seasonal data with at least 3 full seasonal cycles
+  seasonal_data <- sin(2 * pi * (1:72) / 12) * 2 + (1:72) * 0.1 + 10
 
   model <- STLModel(s = 12)
   expect_true(!is.null(model))
@@ -99,8 +99,8 @@ test_that("STLModel requires seasonality parameter", {
 test_that("LSDModel works with seasonal data", {
   skip_if_no_julia()
 
-  # Create seasonal data
-  seasonal_data <- sin(2 * pi * (1:48) / 12) * 2 + (1:48) * 0.1 + 10
+  # Create seasonal data with at least 3 full seasonal cycles
+  seasonal_data <- sin(2 * pi * (1:72) / 12) * 2 + (1:72) * 0.1 + 10
 
   model <- LSDModel(s = 12, window_width = 1)
   expect_true(!is.null(model))

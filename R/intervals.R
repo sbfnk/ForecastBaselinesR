@@ -81,17 +81,17 @@ EmpiricalInterval <- function(n_trajectories = 1000L,
   args$stepwise <- stepwise
   args$return_trajectories <- return_trajectories
 
-  # Construct Julia call
-  args_str <- paste(
+  # Construct Julia call - build list of non-NULL arguments
+  arg_list <- c(
     sprintf("n_trajectories=%d", args$n_trajectories),
     sprintf("min_observation=%d", args$min_observation),
-    if (!is.null(seed)) sprintf("seed=%d", args$seed) else NULL,
+    if (!is.null(seed)) sprintf("seed=%d", args$seed),
     sprintf("positivity_correction=%s", args$positivity_correction),
     sprintf("symmetry_correction=%s", tolower(as.character(args$symmetry_correction))),
     sprintf("stepwise=%s", tolower(as.character(args$stepwise))),
-    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories))),
-    sep = ", "
+    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories)))
   )
+  args_str <- paste(arg_list, collapse = ", ")
 
   julia_code <- sprintf("ForecastBaselines.EmpiricalInterval(%s)", args_str)
   JuliaCall::julia_eval(julia_code)
@@ -178,14 +178,14 @@ ModelTrajectoryInterval <- function(n_trajectories = 1000L,
   args$positivity_correction <- sprintf(":%s", positivity_correction)
   args$return_trajectories <- return_trajectories
 
-  # Construct Julia call
-  args_str <- paste(
+  # Construct Julia call - build list of non-NULL arguments
+  arg_list <- c(
     sprintf("n_trajectories=%d", args$n_trajectories),
-    if (!is.null(seed)) sprintf("seed=%d", args$seed) else NULL,
+    if (!is.null(seed)) sprintf("seed=%d", args$seed),
     sprintf("positivity_correction=%s", args$positivity_correction),
-    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories))),
-    sep = ", "
+    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories)))
   )
+  args_str <- paste(arg_list, collapse = ", ")
 
   julia_code <- sprintf("ForecastBaselines.ModelTrajectoryInterval(%s)", args_str)
   JuliaCall::julia_eval(julia_code)

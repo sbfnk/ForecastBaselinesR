@@ -22,18 +22,17 @@
 score <- function(forecast, rule) {
   check_setup()
 
-  # Convert R forecast back to Julia if needed
-  if (inherits(forecast, "ForecastBaselines_Forecast")) {
-    # Reconstruct Julia forecast object
-    JuliaCall::julia_assign("fc_r", forecast)
-    # For now, assume it's already a Julia object stored in fc variable
-    JuliaCall::julia_assign("fc", forecast)
+  # Use the stored Julia reference if available
+  if (inherits(forecast, "ForecastBaselines_Forecast") && !is.null(forecast$.julia_ref)) {
+    fc_var <- forecast$.julia_ref
   } else {
-    JuliaCall::julia_assign("fc", forecast)
+    # Fallback: assign the forecast object directly
+    JuliaCall::julia_assign("fc_temp", forecast)
+    fc_var <- "fc_temp"
   }
 
   JuliaCall::julia_assign("rule_obj", rule)
-  as.numeric(JuliaCall::julia_eval("ForecastBaselines.score(fc, rule_obj)"))
+  as.numeric(JuliaCall::julia_eval(sprintf("ForecastBaselines.score(%s, rule_obj)", fc_var)))
 }
 
 # Point Forecast Scoring Rules
