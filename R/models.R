@@ -96,7 +96,7 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 #' Creates an ordinary least squares model with polynomial trend.
 #'
 #' @param degree Polynomial degree (default: 1 for linear trend)
-#' @param s Seasonal period (default: NULL for no seasonality)
+#' @param d Differencing degree (default: 0 for no differencing)
 #'
 #' @return An OLSModel object
 #' @export
@@ -106,17 +106,15 @@ LSDModel <- function(s, window_width = 1L, trend_correction = FALSE) {
 #' # Linear trend
 #' model <- OLSModel(degree = 1)
 #'
-#' # Quadratic trend with seasonality
-#' model <- OLSModel(degree = 2, s = 12)
+#' # Quadratic trend with first differencing
+#' model <- OLSModel(degree = 2, d = 1)
 #' }
-OLSModel <- function(degree = 1L, s = NULL) {
+OLSModel <- function(degree = 1L, d = 0L) {
   check_setup()
-  if (is.null(s)) {
-    JuliaCall::julia_eval(sprintf("ForecastBaselines.OLSModel(p=%d)", as.integer(degree)))
-  } else {
-    JuliaCall::julia_eval(sprintf("ForecastBaselines.OLSModel(p=%d, d=%d)",
-                                  as.integer(degree), as.integer(s)))
-  }
+  JuliaCall::julia_eval(sprintf(
+    "ForecastBaselines.OLSModel(p=%d, d=%d)",
+    as.integer(degree), as.integer(d)
+  ))
 }
 
 #' IDS Model
@@ -196,15 +194,14 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L, trend = identity) {
 
   # Convert trend function to Julia
   if (identical(trend, identity)) {
-    trend_str <- "identity"
+    # identity is a built-in Julia function, no quotes needed
+    JuliaCall::julia_eval(sprintf(
+      "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d, trend=identity)",
+      as.integer(p), as.integer(q), as.integer(s)
+    ))
   } else {
     stop("Only identity trend function is currently supported")
   }
-
-  JuliaCall::julia_eval(sprintf(
-    "ForecastBaselines.ARMAModel(p=%d, q=%d, s=%d, trend=%s)",
-    as.integer(p), as.integer(q), as.integer(s), trend_str
-  ))
 }
 
 #' INARCH Model
