@@ -164,8 +164,8 @@ all_scores <- lapply(forecasts, function(fc) {
 
 comparison <- data.frame(
   Model = names(forecasts),
-  MAE = sapply(all_scores, function(s) s$ae_point),
-  RMSE = sapply(all_scores, function(s) sqrt(s$se_point))
+  MAE = vapply(all_scores, function(s) s$ae_point, numeric(1)),
+  RMSE = vapply(all_scores, function(s) sqrt(s$se_point), numeric(1))
 )
 
 cat("\nModel Performance:\n")
