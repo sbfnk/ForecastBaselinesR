@@ -148,20 +148,24 @@ fc_sarma <- add_truth(fc_sarma, truth)
 fc_ets <- add_truth(fc_ets, truth)
 
 # Compare models
+forecasts <- list(
+  STL = fc_stl,
+  LSD = fc_lsd,
+  SARMA = fc_sarma,
+  ETS = fc_ets
+)
+
+# Score all forecasts
+all_scores <- lapply(forecasts, function(fc) {
+  fc_point <- scoringutils::as_forecast_point(fc)
+  scores <- scoringutils::score(fc_point)
+  scoringutils::summarise_scores(scores, by = "model")
+})
+
 comparison <- data.frame(
-  Model = c("STL", "LSD", "SARMA", "ETS"),
-  MAE = c(
-    score(fc_stl)$ae_point,
-    score(fc_lsd)$ae_point,
-    score(fc_sarma)$ae_point,
-    score(fc_ets)$ae_point
-  ),
-  RMSE = c(
-    sqrt(score(fc_stl)$se_point),
-    sqrt(score(fc_lsd)$se_point),
-    sqrt(score(fc_sarma)$se_point),
-    sqrt(score(fc_ets)$se_point)
-  )
+  Model = names(forecasts),
+  MAE = sapply(all_scores, function(s) s$ae_point),
+  RMSE = sapply(all_scores, function(s) sqrt(s$se_point))
 )
 
 cat("\nModel Performance:\n")

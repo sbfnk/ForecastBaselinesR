@@ -230,43 +230,47 @@ fc_with_truth <- forecast(
 )
 
 # Calculate scoring metrics using scoringutils
-scores <- score(fc_with_truth)
-print(scores)
+fc_point <- scoringutils::as_forecast_point(fc_with_truth)
+scores <- scoringutils::score(fc_point)
+scores_summary <- scoringutils::summarise_scores(scores, by = "model")
+print(scores_summary)
 
 # Access specific metrics
-cat("Mean Absolute Error:", scores$ae_point, "\n")
-cat("Root Mean Squared Error:", sqrt(scores$se_point), "\n")
-cat("Absolute Percentage Error:", scores$ape, "\n")
+cat("Mean Absolute Error:", scores_summary$ae_point, "\n")
+cat("Root Mean Squared Error:", sqrt(scores_summary$se_point), "\n")
+cat("Absolute Percentage Error:", scores_summary$ape, "\n")
 ```
 
 ## Available Scoring Rules
 
-**Note:** Scoring is now powered by the [scoringutils](https://epiforecasts.io/scoringutils/) package, providing standardized and comprehensive forecast evaluation.
+**Note:** This package is compatible with the [scoringutils](https://epiforecasts.io/scoringutils/) package, providing standardized and comprehensive forecast evaluation through S3 methods.
 
-Use `score(forecast)` to compute all available metrics, then access them from the result:
+Convert forecasts using `scoringutils::as_forecast_point()` or `scoringutils::as_forecast_quantile()`, then score:
 
 ```r
-# Get all scores
-scores <- score(forecast)
+# Convert forecast to scoringutils format
+fc_point <- scoringutils::as_forecast_point(forecast)
 
-# Point forecast metrics
-mae <- scores$ae_point          # Mean Absolute Error
-mse <- scores$se_point          # Mean Squared Error
-rmse <- sqrt(scores$se_point)   # Root Mean Squared Error
-ape <- scores$ape               # Absolute Percentage Error
+# Score the forecast
+scores <- scoringutils::score(fc_point)
 
-# Probabilistic metrics (for quantile forecasts)
-wis <- scores$wis               # Weighted Interval Score
-bias <- scores$bias             # Forecast bias
-coverage_50 <- scores$interval_coverage_50  # 50% interval coverage
-coverage_90 <- scores$interval_coverage_90  # 90% interval coverage
+# Get summarised scores
+scores_summary <- scoringutils::summarise_scores(scores, by = "model")
+
+# Access metrics from summary
+mae <- scores_summary$ae_point          # Mean Absolute Error
+mse <- scores_summary$se_point          # Mean Squared Error
+rmse <- sqrt(scores_summary$se_point)   # Root Mean Squared Error
+ape <- scores_summary$ape               # Absolute Percentage Error
+
+# For quantile forecasts
+wis <- scores_summary$wis               # Weighted Interval Score
+bias <- scores_summary$bias             # Forecast bias
+coverage_50 <- scores_summary$interval_coverage_50  # 50% interval coverage
+coverage_90 <- scores_summary$interval_coverage_90  # 90% interval coverage
 ```
 
-**Additional functions:**
-
-- `score(forecast, summarise = FALSE)` - Get scores for each horizon separately
-- `get_available_metrics("point")` - See all available point forecast metrics
-- `get_available_metrics("quantile")` - See all available quantile forecast metrics
+See the [scoringutils documentation](https://epiforecasts.io/scoringutils/) for all available metrics and functions.
 
 ## Compare Multiple Models
 
@@ -287,12 +291,15 @@ results <- lapply(names(models), function(name) {
     truth = truth
   )
 
-  fc_scores <- score(fc)
+  fc_point <- scoringutils::as_forecast_point(fc)
+  fc_scores <- scoringutils::score(fc_point)
+  fc_summary <- scoringutils::summarise_scores(fc_scores, by = "model")
+
   data.frame(
     Model = name,
-    MAE = fc_scores$ae_point,
-    RMSE = sqrt(fc_scores$se_point),
-    APE = fc_scores$ape
+    MAE = fc_summary$ae_point,
+    RMSE = sqrt(fc_summary$se_point),
+    APE = fc_summary$ape
   )
 })
 
@@ -440,7 +447,10 @@ fc <- forecast(fitted,
 )
 
 # 5. Score forecasts
-mae <- score(fc, MAE())
+fc_point <- scoringutils::as_forecast_point(fc)
+scores <- scoringutils::score(fc_point)
+scores_summary <- scoringutils::summarise_scores(scores, by = "model")
+mae <- scores_summary$ae_point
 ```
 
 ## Common Models

@@ -96,12 +96,14 @@ truth <- c(5.0, 5.2, 5.4, 5.1, 5.3)
 fc_with_truth <- add_truth(fc, truth)
 
 # 5. Score the forecast
-scores <- score(fc_with_truth)
+fc_point <- scoringutils::as_forecast_point(fc_with_truth)
+scores <- scoringutils::score(fc_point)
+scores_summary <- scoringutils::summarise_scores(scores, by = "model")
 
 # Access specific metrics
-cat("MAE:", scores$ae_point, "\n")
-cat("RMSE:", sqrt(scores$se_point), "\n")
-print(scores)
+cat("MAE:", scores_summary$ae_point, "\n")
+cat("RMSE:", sqrt(scores_summary$se_point), "\n")
+print(scores_summary)
 ```
 
 ## Examples
@@ -154,11 +156,14 @@ results <- lapply(names(models), function(name) {
     model_name = name
   )
 
-  fc_scores <- score(fc)
+  fc_point <- scoringutils::as_forecast_point(fc)
+  fc_scores <- scoringutils::score(fc_point)
+  fc_summary <- scoringutils::summarise_scores(fc_scores, by = "model")
+
   list(
     model = name,
-    mae = fc_scores$ae_point,
-    rmse = sqrt(fc_scores$se_point)
+    mae = fc_summary$ae_point,
+    rmse = sqrt(fc_summary$se_point)
   )
 })
 
