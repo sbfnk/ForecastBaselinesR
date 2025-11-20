@@ -59,11 +59,11 @@ truth <- c(23, 24, 25, 26, 27)
 fc_eval <- add_truth(fc, truth)
 
 # Compute error metrics
-mae <- score(fc_eval, MAE())
-crps <- score(fc_eval, CRPS())
+mae <- MAE(fc_eval)
+rmse <- RMSE(fc_eval)
 
 cat("MAE:", mae, "\n")
-cat("CRPS:", crps, "\n")
+cat("RMSE:", rmse, "\n")
 ```
 
 ## Available Models
@@ -147,8 +147,8 @@ results <- lapply(names(models), function(name) {
   fc <- forecast(fitted, horizon = 1:12, truth = truth)
   data.frame(
     Model = name,
-    MAE = score(fc, MAE()),
-    RMSE = score(fc, RMSE())
+    MAE = MAE(fc),
+    RMSE = RMSE(fc)
   )
 })
 
@@ -180,13 +180,16 @@ Evaluate forecast quality:
 
 ```r
 # Point forecast accuracy
-score(forecast, MAE())      # Mean Absolute Error
-score(forecast, RMSE())     # Root Mean Squared Error
-score(forecast, MAPE())     # Mean Absolute Percentage Error
+MAE(forecast)               # Mean Absolute Error
+RMSE(forecast)              # Root Mean Squared Error
+MAPE(forecast)              # Mean Absolute Percentage Error
 
-# Probabilistic accuracy
-score(forecast, CRPS())     # Continuous Ranked Probability Score
-score(forecast, WIS())      # Weighted Interval Score
+# Probabilistic accuracy (requires quantile/interval forecasts)
+WIS(forecast)               # Weighted Interval Score
+CRPS(forecast)              # Continuous Ranked Probability Score
+
+# Get all metrics at once
+all_scores <- score(forecast)
 ```
 
 ## Common Patterns
@@ -198,7 +201,7 @@ score(forecast, WIS())      # Weighted Interval Score
 fitted <- fit_baseline(data, model)
 fc <- forecast(fitted, interval_method = EmpiricalInterval(),
               horizon = 1:h, truth = truth)
-mae <- score(fc, MAE())
+mae <- MAE(fc)
 ```
 
 ### Pattern 2: Cross-Validation
@@ -215,7 +218,7 @@ for (i in 1:(n - window - 12)) {
 
   fitted <- fit_baseline(train, model)
   fc <- forecast(fitted, horizon = 1:12, truth = test)
-  errors[i] <- score(fc, MAE())
+  errors[i] <- MAE(fc)
 }
 
 cat("Average MAE:", mean(errors), "\n")
