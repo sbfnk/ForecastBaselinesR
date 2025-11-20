@@ -5,7 +5,11 @@
 .onLoad <- function(libname, pkgname) {
   # This will be called when the package is loaded
   packageStartupMessage("ForecastBaselinesR: R interface to ForecastBaselines.jl")
-  packageStartupMessage("Please run setup_ForecastBaselines() to initialize Julia and load the package")
+
+  # Only show setup reminder if Julia is not already initialized
+  if (!is_setup()) {
+    packageStartupMessage("Please run setup_ForecastBaselines() to initialize Julia and load the package")
+  }
 }
 
 #' Setup Julia and load ForecastBaselines.jl
