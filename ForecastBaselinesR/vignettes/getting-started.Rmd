@@ -229,39 +229,41 @@ fc_with_truth <- forecast(
   truth = truth
 )
 
-# Calculate scoring metrics
-mae_score <- MAE(fc_with_truth)
-rmse_score <- RMSE(fc_with_truth)
-mape_score <- MAPE(fc_with_truth)
+# Calculate scoring metrics using scoringutils
+scores <- score(fc_with_truth)
+print(scores)
 
-cat("Mean Absolute Error:", mae_score, "\n")
-cat("Root Mean Squared Error:", rmse_score, "\n")
-cat("Mean Absolute Percentage Error:", mape_score, "\n")
-
-# Get all scores at once using scoringutils
-all_scores <- score(fc_with_truth)
-print(all_scores)
+# Access specific metrics
+cat("Mean Absolute Error:", scores$ae_point, "\n")
+cat("Root Mean Squared Error:", sqrt(scores$se_point), "\n")
+cat("Absolute Percentage Error:", scores$ape, "\n")
 ```
 
 ## Available Scoring Rules
 
 **Note:** Scoring is now powered by the [scoringutils](https://epiforecasts.io/scoringutils/) package, providing standardized and comprehensive forecast evaluation.
 
-**Point Forecast Metrics:**
+Use `score(forecast)` to compute all available metrics, then access them from the result:
 
-- `MAE(forecast)` - Mean Absolute Error
-- `RMSE(forecast)` - Root Mean Squared Error
-- `MSE(forecast)` - Mean Squared Error
-- `MAPE(forecast)` - Mean Absolute Percentage Error
+```r
+# Get all scores
+scores <- score(forecast)
 
-**Probabilistic Metrics:**
+# Point forecast metrics
+mae <- scores$ae_point          # Mean Absolute Error
+mse <- scores$se_point          # Mean Squared Error
+rmse <- sqrt(scores$se_point)   # Root Mean Squared Error
+ape <- scores$ape               # Absolute Percentage Error
 
-- `WIS(forecast)` - Weighted Interval Score (requires quantiles/intervals)
-- `CRPS(forecast)` - Continuous Ranked Probability Score (approximated via WIS for quantile forecasts)
+# Probabilistic metrics (for quantile forecasts)
+wis <- scores$wis               # Weighted Interval Score
+bias <- scores$bias             # Forecast bias
+coverage_50 <- scores$interval_coverage_50  # 50% interval coverage
+coverage_90 <- scores$interval_coverage_90  # 90% interval coverage
+```
 
-**General Scoring:**
+**Additional functions:**
 
-- `score(forecast)` - Compute all available metrics for the forecast type
 - `score(forecast, summarise = FALSE)` - Get scores for each horizon separately
 - `get_available_metrics("point")` - See all available point forecast metrics
 - `get_available_metrics("quantile")` - See all available quantile forecast metrics
@@ -285,11 +287,12 @@ results <- lapply(names(models), function(name) {
     truth = truth
   )
 
+  fc_scores <- score(fc)
   data.frame(
     Model = name,
-    MAE = MAE(fc),
-    RMSE = RMSE(fc),
-    MAPE = MAPE(fc)
+    MAE = fc_scores$ae_point,
+    RMSE = sqrt(fc_scores$se_point),
+    APE = fc_scores$ape
   )
 })
 
