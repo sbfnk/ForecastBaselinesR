@@ -151,22 +151,16 @@ fc_ets <- add_truth(fc_ets, truth)
 comparison <- data.frame(
   Model = c("STL", "LSD", "SARMA", "ETS"),
   MAE = c(
-    score(fc_stl, MAE()),
-    score(fc_lsd, MAE()),
-    score(fc_sarma, MAE()),
-    score(fc_ets, MAE())
+    MAE(fc_stl),
+    MAE(fc_lsd),
+    MAE(fc_sarma),
+    MAE(fc_ets)
   ),
   RMSE = c(
-    score(fc_stl, RMSE()),
-    score(fc_lsd, RMSE()),
-    score(fc_sarma, RMSE()),
-    score(fc_ets, RMSE())
-  ),
-  CRPS = c(
-    score(fc_stl, CRPS()),
-    score(fc_lsd, CRPS()),
-    score(fc_sarma, CRPS()),
-    score(fc_ets, CRPS())
+    RMSE(fc_stl),
+    RMSE(fc_lsd),
+    RMSE(fc_sarma),
+    RMSE(fc_ets)
   )
 )
 

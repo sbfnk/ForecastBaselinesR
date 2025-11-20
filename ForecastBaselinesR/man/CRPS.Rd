@@ -4,18 +4,20 @@
 \alias{CRPS}
 \title{Continuous Ranked Probability Score (CRPS)}
 \usage{
-CRPS()
+CRPS(forecast)
+}
+\arguments{
+\item{forecast}{A Forecast object with quantiles or intervals}
 }
 \value{
-A CRPS scoring rule object
+Numeric CRPS approximation via WIS
 }
 \description{
-Creates a CRPS scoring rule object. CRPS is a proper scoring rule for
-probabilistic forecasts that generalizes MAE to distributions.
+Note: scoringutils computes CRPS via the WIS for quantile forecasts.
+This function returns the WIS value, which approximates CRPS.
 }
 \examples{
 \dontrun{
-rule <- CRPS()
-score_value <- score(forecast, rule)
+crps_score <- CRPS(forecast)
 }
 }

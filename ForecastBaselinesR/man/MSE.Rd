@@ -4,18 +4,20 @@
 \alias{MSE}
 \title{Mean Squared Error (MSE)}
 \usage{
-MSE()
+MSE(forecast)
+}
+\arguments{
+\item{forecast}{A Forecast object (from forecast() function)}
 }
 \value{
-An MSE scoring rule object
+Numeric MSE value
 }
 \description{
-Creates an MSE scoring rule object. MSE measures the average squared
-difference between forecasts and observations.
+Computes the Mean Squared Error for a forecast. This is a convenience
+wrapper around score() that returns only the MSE value.
 }
 \examples{
 \dontrun{
-rule <- MSE()
-score_value <- score(forecast, rule)
+mse_score <- MSE(forecast)
 }
 }

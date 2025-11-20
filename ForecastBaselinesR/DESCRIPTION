@@ -15,7 +15,8 @@ LazyData: true
 Depends:
     R (>= 3.5.0)
 Imports:
-    JuliaCall (>= 0.17.0)
+    JuliaCall (>= 0.17.0),
+    scoringutils (>= 1.0.0)
 SystemRequirements: Julia (>= 1.9)
 RoxygenNote: 7.3.3
 URL: https://github.com/ManuelStapper/ForecastBaselines.jl
