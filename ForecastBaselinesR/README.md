@@ -6,9 +6,8 @@ An R interface to the [ForecastBaselines.jl](https://github.com/ManuelStapper/Fo
 
 - **10 Forecasting Models**: From simple baselines (Constant, Marginal) to advanced time series models (ARMA, ETS, STL)
 - **Probabilistic Forecasting**: Multiple methods for prediction intervals (empirical, parametric, model-based)
-- **Comprehensive Scoring**: Point forecast metrics (MAE, RMSE) and probabilistic scores (CRPS, WIS)
+- **Comprehensive Scoring**: Powered by [scoringutils](https://epiforecasts.io/scoringutils/) - access to all standard forecast evaluation metrics
 - **Data Transformations**: Log, power, Box-Cox transformations with automatic back-transformation
-- **Calibration Diagnostics**: PIT functions and Cramér-von Mises divergence
 
 ## Available Models
 
@@ -300,11 +299,11 @@ ForecastBaselinesR/
 ├── NAMESPACE          # Exported functions
 ├── README.md          # This file
 ├── R/
-│   ├── zzz.R          # Package initialization
+│   ├── setup.R        # Package initialization and Julia setup
 │   ├── models.R       # Model constructors
 │   ├── forecast.R     # Forecasting functions
 │   ├── intervals.R    # Interval methods
-│   ├── scoring.R      # Scoring rules
+│   ├── scoring.R      # Scoring rules (via scoringutils)
 │   ├── utils.R        # Utility functions
 │   └── transformations.R  # Data transformations
 └── examples/          # Example scripts
