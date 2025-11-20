@@ -103,9 +103,9 @@ test_that("score returns individual scores when summarise=FALSE", {
   expect_true("horizon" %in% names(scores))
 })
 
-# Metric Convenience Functions ------------------------------------------
+# Metric Access Tests --------------------------------------------------
 
-test_that("MAE returns numeric value", {
+test_that("score returns correct metrics that can be accessed", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -122,84 +122,23 @@ test_that("MAE returns numeric value", {
     truth = truth_vals
   )
 
-  mae_score <- MAE(fc)
+  scores <- score(fc)
 
-  expect_type(mae_score, "double")
-  expect_length(mae_score, 1)
-  expect_true(mae_score >= 0)
-})
+  # Check that key metrics are accessible
+  expect_true("ae_point" %in% names(scores))
+  expect_true("se_point" %in% names(scores))
+  expect_true("ape" %in% names(scores))
 
-test_that("MSE returns numeric value", {
-  skip_if_no_julia()
-  skip_on_cran()
+  # Check values are numeric and non-negative
+  expect_type(scores$ae_point, "double")
+  expect_true(scores$ae_point >= 0)
+  expect_true(scores$se_point >= 0)
+  expect_true(scores$ape >= 0)
 
-  set.seed(123)
-  data <- rnorm(50, mean = 100, sd = 10)
-  truth_vals <- rnorm(5, mean = 100, sd = 10)
-
-  model <- ConstantModel()
-  fitted <- fit_baseline(data, model)
-
-  fc <- forecast(fitted,
-    interval_method = NoInterval(),
-    horizon = 1:5,
-    truth = truth_vals
-  )
-
-  mse_score <- MSE(fc)
-
-  expect_type(mse_score, "double")
-  expect_length(mse_score, 1)
-  expect_true(mse_score >= 0)
-})
-
-test_that("RMSE returns numeric value", {
-  skip_if_no_julia()
-  skip_on_cran()
-
-  set.seed(123)
-  data <- rnorm(50, mean = 100, sd = 10)
-  truth_vals <- rnorm(5, mean = 100, sd = 10)
-
-  model <- ConstantModel()
-  fitted <- fit_baseline(data, model)
-
-  fc <- forecast(fitted,
-    interval_method = NoInterval(),
-    horizon = 1:5,
-    truth = truth_vals
-  )
-
-  rmse_score <- RMSE(fc)
-
-  expect_type(rmse_score, "double")
-  expect_length(rmse_score, 1)
-  expect_true(rmse_score >= 0)
-})
-
-test_that("MAPE returns numeric value", {
-  skip_if_no_julia()
-  skip_on_cran()
-
-  set.seed(123)
-  # Use positive values for MAPE
-  data <- abs(rnorm(50, mean = 100, sd = 10)) + 10
-  truth_vals <- abs(rnorm(5, mean = 100, sd = 10)) + 10
-
-  model <- ConstantModel()
-  fitted <- fit_baseline(data, model)
-
-  fc <- forecast(fitted,
-    interval_method = NoInterval(),
-    horizon = 1:5,
-    truth = truth_vals
-  )
-
-  mape_score <- MAPE(fc)
-
-  expect_type(mape_score, "double")
-  expect_length(mape_score, 1)
-  expect_true(mape_score >= 0)
+  # Check RMSE calculation
+  rmse <- sqrt(scores$se_point)
+  expect_type(rmse, "double")
+  expect_true(rmse >= 0)
 })
 
 # Comparative Tests -----------------------------------------------------
@@ -221,9 +160,10 @@ test_that("MAE and RMSE have expected relationship", {
     truth = truth_vals
   )
 
-  mae_score <- MAE(fc)
-  mse_score <- MSE(fc)
-  rmse_score <- RMSE(fc)
+  scores <- score(fc)
+  mae_score <- scores$ae_point
+  mse_score <- scores$se_point
+  rmse_score <- sqrt(scores$se_point)
 
   # RMSE should equal sqrt(MSE)
   expect_equal(rmse_score, sqrt(mse_score), tolerance = 1e-10)

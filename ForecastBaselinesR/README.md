@@ -97,14 +97,12 @@ truth <- c(5.0, 5.2, 5.4, 5.1, 5.3)
 fc_with_truth <- add_truth(fc, truth)
 
 # 5. Score the forecast
-mae <- MAE(fc_with_truth)
-rmse <- RMSE(fc_with_truth)
+scores <- score(fc_with_truth)
 
-# Or get all scores at once
-all_scores <- score(fc_with_truth)
-
-cat("MAE:", mae, "\n")
-cat("RMSE:", rmse, "\n")
+# Access specific metrics
+cat("MAE:", scores$ae_point, "\n")
+cat("RMSE:", sqrt(scores$se_point), "\n")
+print(scores)
 ```
 
 ## Examples
@@ -157,10 +155,11 @@ results <- lapply(names(models), function(name) {
     model_name = name
   )
 
+  fc_scores <- score(fc)
   list(
     model = name,
-    mae = MAE(fc),
-    rmse = RMSE(fc)
+    mae = fc_scores$ae_point,
+    rmse = sqrt(fc_scores$se_point)
   )
 })
 
@@ -271,20 +270,27 @@ interval_method = ModelTrajectoryInterval(
 
 **Scoring powered by [scoringutils](https://epiforecasts.io/scoringutils/)**
 
-### Point Forecast Scores
-- `MAE(forecast)` - Mean Absolute Error
-- `RMSE(forecast)` - Root Mean Squared Error
-- `MSE(forecast)` - Mean Squared Error
-- `MAPE(forecast)` - Mean Absolute Percentage Error
+Use `score(forecast)` to compute all metrics, then access them from the result:
 
-### Probabilistic Scores
-- `WIS(forecast)` - Weighted Interval Score
-- `CRPS(forecast)` - Continuous Ranked Probability Score (via WIS)
+```r
+# Get all scores
+scores <- score(forecast)
 
-### General Scoring
-- `score(forecast)` - Compute all available metrics
+# Access specific metrics
+mae <- scores$ae_point        # Mean Absolute Error
+mse <- scores$se_point        # Mean Squared Error
+rmse <- sqrt(scores$se_point) # Root Mean Squared Error
+ape <- scores$ape             # Absolute Percentage Error
+
+# For quantile forecasts
+wis <- scores$wis             # Weighted Interval Score
+bias <- scores$bias           # Forecast bias
+```
+
+**Additional functions:**
 - `score(forecast, summarise = FALSE)` - Get per-horizon scores
-- `get_available_metrics("point")` - List available metrics
+- `get_available_metrics("point")` - List available point forecast metrics
+- `get_available_metrics("quantile")` - List available quantile forecast metrics
 
 ## Package Structure
 

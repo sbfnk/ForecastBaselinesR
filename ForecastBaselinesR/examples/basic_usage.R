@@ -69,15 +69,13 @@ print(round(truth, 2))
 # Add truth to forecast
 fc_with_truth <- add_truth(fc, truth)
 
-# Compute various scores
-cat("\nForecast scores:\n")
-cat("MAE:  ", round(MAE(fc_with_truth), 3), "\n")
-cat("RMSE: ", round(RMSE(fc_with_truth), 3), "\n")
-
-# Get all scores at once
+# Get all scores using scoringutils
 all_scores <- score(fc_with_truth)
-cat("\nAll available scores:\n")
+cat("\nForecast scores:\n")
 print(all_scores)
+
+# Access specific scores from the result
+cat("\nMAE (ae_point):", round(all_scores$ae_point, 3), "\n")
 
 # ============================================================================
 # Example 4: Different Models Comparison
@@ -114,10 +112,12 @@ for (model_name in names(models)) {
     model_name = model_name
   )
 
+  # Score and extract metrics
+  fc_scores <- score(fc)
   results <- rbind(results, data.frame(
     Model = model_name,
-    MAE = MAE(fc),
-    RMSE = RMSE(fc)
+    MAE = fc_scores$ae_point,
+    RMSE = sqrt(fc_scores$se_point)
   ))
 }
 

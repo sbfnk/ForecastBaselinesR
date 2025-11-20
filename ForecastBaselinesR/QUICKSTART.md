@@ -59,11 +59,10 @@ truth <- c(23, 24, 25, 26, 27)
 fc_eval <- add_truth(fc, truth)
 
 # Compute error metrics
-mae <- MAE(fc_eval)
-rmse <- RMSE(fc_eval)
+scores <- score(fc_eval)
 
-cat("MAE:", mae, "\n")
-cat("RMSE:", rmse, "\n")
+cat("MAE:", scores$ae_point, "\n")
+cat("RMSE:", sqrt(scores$se_point), "\n")
 ```
 
 ## Available Models
@@ -145,10 +144,11 @@ models <- list(
 results <- lapply(names(models), function(name) {
   fitted <- fit_baseline(data, models[[name]])
   fc <- forecast(fitted, horizon = 1:12, truth = truth)
+  fc_scores <- score(fc)
   data.frame(
     Model = name,
-    MAE = MAE(fc),
-    RMSE = RMSE(fc)
+    MAE = fc_scores$ae_point,
+    RMSE = sqrt(fc_scores$se_point)
   )
 })
 
@@ -179,17 +179,17 @@ ModelTrajectoryInterval(n_trajectories = 1000)
 Evaluate forecast quality:
 
 ```r
-# Point forecast accuracy
-MAE(forecast)               # Mean Absolute Error
-RMSE(forecast)              # Root Mean Squared Error
-MAPE(forecast)              # Mean Absolute Percentage Error
-
-# Probabilistic accuracy (requires quantile/interval forecasts)
-WIS(forecast)               # Weighted Interval Score
-CRPS(forecast)              # Continuous Ranked Probability Score
-
 # Get all metrics at once
-all_scores <- score(forecast)
+scores <- score(forecast)
+
+# Access specific metrics
+mae <- scores$ae_point          # Mean Absolute Error
+rmse <- sqrt(scores$se_point)   # Root Mean Squared Error
+ape <- scores$ape               # Absolute Percentage Error
+
+# For probabilistic forecasts (requires quantile/interval forecasts)
+wis <- scores$wis               # Weighted Interval Score
+bias <- scores$bias             # Forecast bias
 ```
 
 ## Common Patterns
@@ -201,7 +201,8 @@ all_scores <- score(forecast)
 fitted <- fit_baseline(data, model)
 fc <- forecast(fitted, interval_method = EmpiricalInterval(),
               horizon = 1:h, truth = truth)
-mae <- MAE(fc)
+scores <- score(fc)
+mae <- scores$ae_point
 ```
 
 ### Pattern 2: Cross-Validation
@@ -218,7 +219,7 @@ for (i in 1:(n - window - 12)) {
 
   fitted <- fit_baseline(train, model)
   fc <- forecast(fitted, horizon = 1:12, truth = test)
-  errors[i] <- MAE(fc)
+  errors[i] <- score(fc)$ae_point
 }
 
 cat("Average MAE:", mean(errors), "\n")
