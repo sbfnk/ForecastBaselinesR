@@ -254,9 +254,9 @@ test_that("get_available_metrics returns list for quantile forecasts", {
   expect_true("wis" %in% names(metrics))
 })
 
-# Deprecated Function Tests ---------------------------------------------
+# Custom Metrics Tests -------------------------------------------------
 
-test_that("deprecated functions show warnings and errors", {
+test_that("score works with custom metrics", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -273,16 +273,16 @@ test_that("deprecated functions show warnings and errors", {
     truth = truth_vals
   )
 
-  # These functions are deprecated and should throw errors
-  # Suppress the expected deprecation warnings
-  suppressWarnings({
-    expect_error(MdAE(fc), "no longer supported")
-    expect_error(MSPE(fc), "no longer supported")
-    expect_error(RelativeBias(fc), "no longer supported")
-    expect_error(CRPS_trajectory(fc), "no longer supported")
-    expect_error(PIT_function(fc), "no longer supported")
-    expect_error(CvM_divergence(fc), "no longer supported")
-  })
+  # Test using custom metrics via score()
+  # Get default metrics and verify they work
+  default_metrics <- get_available_metrics("point")
+  expect_type(default_metrics, "list")
+  expect_true(length(default_metrics) > 0)
+
+  # Score with custom subset of metrics
+  custom_scores <- score(fc, metrics = list(mae = default_metrics$ae_point))
+  expect_s3_class(custom_scores, "data.frame")
+  expect_true("mae" %in% names(custom_scores))
 })
 
 # Multiple Models Comparison --------------------------------------------
