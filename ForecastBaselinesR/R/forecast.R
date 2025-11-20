@@ -133,12 +133,20 @@ forecast <- function(fitted,
   fc_id <- paste0("fc_", sample.int(.Machine$integer.max, 1))
 
   if (is.null(truth)) {
-    julia_cmd <- sprintf("%s = ForecastBaselines.forecast(fitted_obj; interval_method = interval_method_obj, horizon = h, levels = lvls, include_median = inc_median, model_name = mdl_name)", fc_id)
+    julia_cmd <- paste0(
+      fc_id, " = ForecastBaselines.forecast(fitted_obj; ",
+      "interval_method = interval_method_obj, horizon = h, levels = lvls, ",
+      "include_median = inc_median, model_name = mdl_name)"
+    )
     JuliaCall::julia_command(julia_cmd)
     forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
   } else {
     JuliaCall::julia_assign("truth_vals", as.numeric(truth))
-    julia_cmd <- sprintf("%s = ForecastBaselines.forecast(fitted_obj; interval_method = interval_method_obj, horizon = h, levels = lvls, include_median = inc_median, truth = truth_vals, model_name = mdl_name)", fc_id)
+    julia_cmd <- paste0(
+      fc_id, " = ForecastBaselines.forecast(fitted_obj; ",
+      "interval_method = interval_method_obj, horizon = h, levels = lvls, ",
+      "include_median = inc_median, truth = truth_vals, model_name = mdl_name)"
+    )
     JuliaCall::julia_command(julia_cmd)
     forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
   }

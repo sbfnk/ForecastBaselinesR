@@ -80,4 +80,3 @@ as_forecast_quantile.ForecastBaselines_Forecast <- function(data, ...) {
 
   as_forecast_quantile(df)
 }
-
