@@ -10,5 +10,14 @@ is_setup()
 TRUE if setup is complete, FALSE otherwise
 }
 \description{
-Check if Julia and ForecastBaselines.jl are set up
+Tests whether Julia is configured and ForecastBaselines.jl is accessible.
+}
+\examples{
+\dontrun{
+if (is_setup()) {
+  # Use forecasting functions
+} else {
+  setup_ForecastBaselines()
+}
+}
 }

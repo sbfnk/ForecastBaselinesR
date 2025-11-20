@@ -3,13 +3,28 @@
 
 #' @importFrom JuliaCall julia_setup julia_eval julia_call julia_assign
 .onLoad <- function(libname, pkgname) {
-  # This will be called when the package is loaded
-  packageStartupMessage("ForecastBaselinesR: R interface to ForecastBaselines.jl")
+  # Try automatic setup
+  tryCatch(
+    {
+      # Try to setup Julia connection (don't install Julia automatically in .onLoad)
+      JuliaCall::julia_setup()
 
-  # Only show setup reminder if Julia is not already initialized
-  if (!is_setup()) {
-    packageStartupMessage("Please run setup_ForecastBaselines() to initialize Julia and load the package")
-  }
+      # Try to load ForecastBaselines.jl if it exists
+      JuliaCall::julia_eval("using ForecastBaselines")
+
+      # Load helper functions
+      helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
+      if (file.exists(helper_file)) {
+        JuliaCall::julia_command(sprintf('include("%s")', helper_file))
+      }
+
+      packageStartupMessage("ForecastBaselinesR: Julia backend loaded successfully")
+    },
+    error = function(e) {
+      packageStartupMessage("ForecastBaselinesR: R interface to ForecastBaselines.jl")
+      packageStartupMessage("Julia setup incomplete. Run setup_ForecastBaselines() to configure.")
+    }
+  )
 }
 
 #' Setup Julia and load ForecastBaselines.jl
@@ -102,10 +117,30 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
 
 #' Check if Julia and ForecastBaselines.jl are set up
 #'
+#' Tests whether Julia is configured and ForecastBaselines.jl is accessible.
+#'
 #' @return TRUE if setup is complete, FALSE otherwise
 #' @export
+#'
+#' @examples
+#' \dontrun{
+#' if (is_setup()) {
+#'   # Use forecasting functions
+#' } else {
+#'   setup_ForecastBaselines()
+#' }
+#' }
 is_setup <- function() {
-  !is.null(.fbr_env$julia)
+  tryCatch(
+    {
+      # Check if Julia is available and ForecastBaselines is loaded
+      JuliaCall::julia_eval("isdefined(Main, :ForecastBaselines)")
+    },
+    error = function(e) {
+      # Julia not available at all
+      FALSE
+    }
+  )
 }
 
 # Internal function to check setup and give helpful error message
