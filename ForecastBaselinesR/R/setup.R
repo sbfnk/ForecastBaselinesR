@@ -12,10 +12,10 @@
       # Try to load ForecastBaselines.jl if it exists
       JuliaCall::julia_eval("using ForecastBaselines")
 
-      # Load helper functions
+      # Load helper functions (semicolon suppresses output)
       helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
       if (file.exists(helper_file)) {
-        JuliaCall::julia_command(sprintf('include("%s")', helper_file))
+        JuliaCall::julia_eval(sprintf('include("%s"); nothing', helper_file))
       }
 
       packageStartupMessage("ForecastBaselinesR: Julia backend loaded successfully")
@@ -103,7 +103,7 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
   }
   helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
   if (file.exists(helper_file)) {
-    JuliaCall::julia_command(sprintf('include("%s")', helper_file))
+    JuliaCall::julia_eval(sprintf('include("%s"); nothing', helper_file))
   } else {
     warning("Could not find forecast_helpers.jl - some functions may not work correctly")
   }
