@@ -2,7 +2,7 @@
 
 # Conversion Tests ------------------------------------------------------
 
-test_that("as_scoringutils_data converts point forecast correctly", {
+test_that("as_forecast_point S3 method converts forecast correctly", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -19,18 +19,19 @@ test_that("as_scoringutils_data converts point forecast correctly", {
     truth = truth_vals
   )
 
-  fc_data <- as_scoringutils_data(fc, forecast_type = "point")
+  # Use scoringutils S3 method
+  fc_point <- as_forecast_point(fc)
 
-  expect_s3_class(fc_data, "data.frame")
-  expect_true("observed" %in% names(fc_data))
-  expect_true("predicted" %in% names(fc_data))
-  expect_true("horizon" %in% names(fc_data))
-  expect_true("model" %in% names(fc_data))
-  expect_equal(nrow(fc_data), 5)
-  expect_equal(fc_data$observed, truth_vals)
+  expect_s3_class(fc_point, "forecast_point")
+  expect_true("observed" %in% names(fc_point))
+  expect_true("predicted" %in% names(fc_point))
+  expect_true("horizon" %in% names(fc_point))
+  expect_true("model" %in% names(fc_point))
+  expect_equal(nrow(fc_point), 5)
+  expect_equal(fc_point$observed, truth_vals)
 })
 
-test_that("as_scoringutils_data requires truth values", {
+test_that("as_forecast_point requires truth values", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -47,14 +48,14 @@ test_that("as_scoringutils_data requires truth values", {
   )
 
   expect_error(
-    as_scoringutils_data(fc),
+    as_forecast_point(fc),
     "truth values"
   )
 })
 
 # Score Function Tests --------------------------------------------------
 
-test_that("score returns data.frame with summarised scores", {
+test_that("score works with converted forecast", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -71,15 +72,18 @@ test_that("score returns data.frame with summarised scores", {
     truth = truth_vals
   )
 
-  scores <- score(fc)
+  # Convert and score using scoringutils
+  fc_point <- as_forecast_point(fc)
+  scores <- score(fc_point)
+  scores_summary <- summarise_scores(scores, by = "model")
 
-  expect_s3_class(scores, "data.frame")
-  expect_true("model" %in% names(scores))
+  expect_s3_class(scores_summary, "data.frame")
+  expect_true("model" %in% names(scores_summary))
   # Point forecast should have ae_point, se_point, ape
-  expect_true(any(c("ae_point", "se_point", "ape") %in% names(scores)))
+  expect_true(any(c("ae_point", "se_point", "ape") %in% names(scores_summary)))
 })
 
-test_that("score returns individual scores when summarise=FALSE", {
+test_that("score returns individual scores without summarising", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -96,7 +100,9 @@ test_that("score returns individual scores when summarise=FALSE", {
     truth = truth_vals
   )
 
-  scores <- score(fc, summarise = FALSE)
+  # Convert and score without summarising
+  fc_point <- as_forecast_point(fc)
+  scores <- score(fc_point)
 
   expect_s3_class(scores, "data.frame")
   expect_equal(nrow(scores), 5) # One row per horizon
@@ -122,7 +128,10 @@ test_that("score returns correct metrics that can be accessed", {
     truth = truth_vals
   )
 
-  scores <- score(fc)
+  # Convert and score
+  fc_point <- as_forecast_point(fc)
+  scores <- score(fc_point)
+  scores_summary <- summarise_scores(scores, by = "model")
 
   # Check that key metrics are accessible
   expect_true("ae_point" %in% names(scores))
@@ -131,14 +140,14 @@ test_that("score returns correct metrics that can be accessed", {
 
   # Check values are numeric and non-negative
   expect_type(scores$ae_point, "double")
-  expect_true(scores$ae_point >= 0)
-  expect_true(scores$se_point >= 0)
-  expect_true(scores$ape >= 0)
+  expect_true(all(scores$ae_point >= 0))
+  expect_true(all(scores$se_point >= 0))
+  expect_true(all(scores$ape >= 0))
 
   # Check RMSE calculation
   rmse <- sqrt(scores$se_point)
   expect_type(rmse, "double")
-  expect_true(rmse >= 0)
+  expect_true(all(rmse >= 0))
 })
 
 # Comparative Tests -----------------------------------------------------
@@ -160,69 +169,20 @@ test_that("MAE and RMSE have expected relationship", {
     truth = truth_vals
   )
 
-  scores <- score(fc)
-  mae_score <- scores$ae_point
-  mse_score <- scores$se_point
-  rmse_score <- sqrt(scores$se_point)
+  # Convert and score
+  fc_point <- as_forecast_point(fc)
+  scores <- score(fc_point)
+  scores_summary <- summarise_scores(scores, by = "model")
+
+  mae_score <- scores_summary$ae_point
+  mse_score <- scores_summary$se_point
+  rmse_score <- sqrt(scores_summary$se_point)
 
   # RMSE should equal sqrt(MSE)
   expect_equal(rmse_score, sqrt(mse_score), tolerance = 1e-10)
 
   # By Cauchy-Schwarz, RMSE >= MAE (with equality only when all errors are equal)
   expect_true(rmse_score >= mae_score - 1e-10)
-})
-
-# get_available_metrics Tests -------------------------------------------
-
-test_that("get_available_metrics returns list for point forecasts", {
-  skip_on_cran()
-
-  metrics <- get_available_metrics("point")
-
-  expect_type(metrics, "list")
-  expect_true(length(metrics) > 0)
-  expect_true("ae_point" %in% names(metrics))
-})
-
-test_that("get_available_metrics returns list for quantile forecasts", {
-  skip_on_cran()
-
-  metrics <- get_available_metrics("quantile")
-
-  expect_type(metrics, "list")
-  expect_true(length(metrics) > 0)
-  expect_true("wis" %in% names(metrics))
-})
-
-# Custom Metrics Tests -------------------------------------------------
-
-test_that("score works with custom metrics", {
-  skip_if_no_julia()
-  skip_on_cran()
-
-  set.seed(123)
-  data <- rnorm(50, mean = 100, sd = 10)
-  truth_vals <- rnorm(5, mean = 100, sd = 10)
-
-  model <- ConstantModel()
-  fitted <- fit_baseline(data, model)
-
-  fc <- forecast(fitted,
-    interval_method = NoInterval(),
-    horizon = 1:5,
-    truth = truth_vals
-  )
-
-  # Test using custom metrics via score()
-  # Get default metrics and verify they work
-  default_metrics <- get_available_metrics("point")
-  expect_type(default_metrics, "list")
-  expect_true(length(default_metrics) > 0)
-
-  # Score with custom subset of metrics
-  custom_scores <- score(fc, metrics = list(mae = default_metrics$ae_point))
-  expect_s3_class(custom_scores, "data.frame")
-  expect_true("mae" %in% names(custom_scores))
 })
 
 # Multiple Models Comparison --------------------------------------------
@@ -245,11 +205,14 @@ test_that("score works with multiple horizons and produces correct output", {
     model_name = "ConstantModel"
   )
 
-  # Get summarised scores
-  scores_sum <- score(fc, summarise = TRUE)
-  expect_equal(nrow(scores_sum), 1) # One row for the model
+  # Convert and score
+  fc_point <- as_forecast_point(fc)
+  scores <- score(fc_point)
 
-  # Get individual scores
-  scores_ind <- score(fc, summarise = FALSE)
-  expect_equal(nrow(scores_ind), 10) # One row per horizon
+  # Check individual scores
+  expect_equal(nrow(scores), 10) # One row per horizon
+
+  # Get summarised scores
+  scores_sum <- summarise_scores(scores, by = "model")
+  expect_equal(nrow(scores_sum), 1) # One row for the model
 })

@@ -6,7 +6,7 @@ An R interface to the [ForecastBaselines.jl](https://github.com/ManuelStapper/Fo
 
 - **10 Forecasting Models**: From simple baselines (Constant, Marginal) to advanced time series models (ARMA, ETS, STL)
 - **Probabilistic Forecasting**: Multiple methods for prediction intervals (empirical, parametric, model-based)
-- **Comprehensive Scoring**: Powered by [scoringutils](https://epiforecasts.io/scoringutils/) - access to all standard forecast evaluation metrics
+- **Comprehensive Scoring**: Compatible with [scoringutils](https://epiforecasts.io/scoringutils/) - access to all standard forecast evaluation metrics
 - **Data Transformations**: Log, power, Box-Cox transformations with automatic back-transformation
 
 ## Available Models
