@@ -6,23 +6,35 @@
   # Try automatic setup
   tryCatch(
     {
-      # Try to setup Julia connection (don't install Julia automatically in .onLoad)
+      # Try to setup Julia connection (don't install Julia automatically
+      # in .onLoad)
       JuliaCall::julia_setup()
 
       # Try to load ForecastBaselines.jl if it exists
       JuliaCall::julia_eval("using ForecastBaselines")
 
       # Load helper functions (semicolon suppresses output)
-      helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
+      helper_file <- system.file(
+        "julia", "forecast_helpers.jl",
+        package = "ForecastBaselinesR"
+      )
       if (file.exists(helper_file)) {
-        JuliaCall::julia_eval(sprintf('include("%s"); nothing', helper_file))
+        JuliaCall::julia_eval(
+          sprintf('include("%s"); nothing', helper_file)
+        )
       }
 
-      packageStartupMessage("ForecastBaselinesR: Julia backend loaded successfully")
+      packageStartupMessage(
+        "ForecastBaselinesR: Julia backend loaded successfully"
+      )
     },
     error = function(e) {
-      packageStartupMessage("ForecastBaselinesR: R interface to ForecastBaselines.jl")
-      packageStartupMessage("Julia setup incomplete. Run setup_ForecastBaselines() to configure.")
+      packageStartupMessage(
+        "ForecastBaselinesR: R interface to ForecastBaselines.jl"
+      )
+      packageStartupMessage(
+        "Julia setup incomplete. Run setup_ForecastBaselines() to configure."
+      )
     }
   )
 }
@@ -32,8 +44,10 @@
 #' This function initializes Julia, installs ForecastBaselines.jl if needed,
 #' and loads the package. Must be called before using any forecasting functions.
 #'
-#' @param JULIA_HOME Path to Julia installation (optional, will auto-detect if not provided)
-#' @param install_package Whether to install ForecastBaselines.jl if not already installed
+#' @param JULIA_HOME Path to Julia installation (optional, will auto-detect
+#'   if not provided)
+#' @param install_package Whether to install ForecastBaselines.jl if not
+#'   already installed
 #' @param rebuild Whether to rebuild the Julia system image
 #' @param verbose Whether to print verbose output during setup
 #'
@@ -60,7 +74,10 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
   if (is.null(JULIA_HOME)) {
     .fbr_env$julia <- JuliaCall::julia_setup(rebuild = rebuild)
   } else {
-    .fbr_env$julia <- JuliaCall::julia_setup(JULIA_HOME = JULIA_HOME, rebuild = rebuild)
+    .fbr_env$julia <- JuliaCall::julia_setup(
+      JULIA_HOME = JULIA_HOME,
+      rebuild = rebuild
+    )
   }
 
   if (verbose) {
@@ -85,7 +102,12 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
         if (verbose) {
           message("Installing ForecastBaselines.jl...")
         }
-        JuliaCall::julia_eval('using Pkg; Pkg.add(url="https://github.com/ManuelStapper/ForecastBaselines.jl")')
+        JuliaCall::julia_eval(
+          paste0(
+            'using Pkg; Pkg.add(url="',
+            'https://github.com/ManuelStapper/ForecastBaselines.jl")'
+          )
+        )
         JuliaCall::julia_eval("using ForecastBaselines")
         if (verbose) {
           message("ForecastBaselines.jl installed successfully")
@@ -101,11 +123,17 @@ setup_ForecastBaselines <- function(JULIA_HOME = NULL,
   if (verbose) {
     message("Loading R conversion helpers...")
   }
-  helper_file <- system.file("julia", "forecast_helpers.jl", package = "ForecastBaselinesR")
+  helper_file <- system.file(
+    "julia", "forecast_helpers.jl",
+    package = "ForecastBaselinesR"
+  )
   if (file.exists(helper_file)) {
     JuliaCall::julia_eval(sprintf('include("%s"); nothing', helper_file))
   } else {
-    warning("Could not find forecast_helpers.jl - some functions may not work correctly")
+    warning(
+      "Could not find forecast_helpers.jl - ",
+      "some functions may not work correctly"
+    )
   }
 
   if (verbose) {
@@ -146,7 +174,9 @@ is_setup <- function() {
 # Internal function to check setup and give helpful error message
 check_setup <- function() {
   if (!is_setup()) {
-    stop("Julia and ForecastBaselines.jl are not set up. Please run setup_ForecastBaselines() first.",
+    stop(
+      "Julia and ForecastBaselines.jl are not set up. ",
+      "Please run setup_ForecastBaselines() first.",
       call. = FALSE
     )
   }

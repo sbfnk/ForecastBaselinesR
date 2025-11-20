@@ -1,6 +1,7 @@
 # Scoring Rules and Evaluation Functions using scoringutils
 
-#' @importFrom scoringutils as_forecast_point as_forecast_quantile score summarise_scores get_metrics
+#' @importFrom scoringutils as_forecast_point as_forecast_quantile score
+#'   summarise_scores get_metrics
 NULL
 
 #' Convert ForecastBaselines Forecast to scoringutils point forecast
@@ -21,7 +22,10 @@ NULL
 #' }
 as_forecast_point.ForecastBaselines_Forecast <- function(data, ...) {
   if (is.null(data$truth) || all(is.na(data$truth))) {
-    stop("Forecast must contain truth values for scoring. Use add_truth() to add them.")
+    stop(
+      "Forecast must contain truth values for scoring. ",
+      "Use add_truth() to add them."
+    )
   }
 
   model_name <- if (!is.null(data$model_name)) data$model_name else "model"
@@ -55,12 +59,18 @@ as_forecast_point.ForecastBaselines_Forecast <- function(data, ...) {
 #' }
 as_forecast_quantile.ForecastBaselines_Forecast <- function(data, ...) {
   if (is.null(data$truth) || all(is.na(data$truth))) {
-    stop("Forecast must contain truth values for scoring. Use add_truth() to add them.")
+    stop(
+      "Forecast must contain truth values for scoring. ",
+      "Use add_truth() to add them."
+    )
   }
 
   # Check if we have quantiles
   if (is.null(data$quantiles) || length(data$quantiles) == 0) {
-    stop("Forecast does not have quantile data. Cannot convert to quantile forecast.")
+    stop(
+      "Forecast does not have quantile data. ",
+      "Cannot convert to quantile forecast."
+    )
   }
 
   model_name <- if (!is.null(data$model_name)) data$model_name else "model"

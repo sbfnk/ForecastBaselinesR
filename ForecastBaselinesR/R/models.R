@@ -2,8 +2,8 @@
 
 #' Constant Model
 #'
-#' Creates a naive forecast model that uses the last observed value as the forecast
-#' for all future horizons.
+#' Creates a naive forecast model that uses the last observed value as the
+#' forecast for all future horizons.
 #'
 #' @return A ConstantModel object
 #' @export
@@ -19,10 +19,11 @@ ConstantModel <- function() {
 
 #' Marginal Model
 #'
-#' Creates a forecast based on the empirical marginal distribution using the mean
-#' of the p most recent observations.
+#' Creates a forecast based on the empirical marginal distribution using the
+#' mean of the p most recent observations.
 #'
-#' @param p Number of most recent observations to use (default: all observations)
+#' @param p Number of most recent observations to use (default: all
+#'   observations)
 #'
 #' @return A MarginalModel object
 #' @export
@@ -64,11 +65,14 @@ KDEModel <- function(bandwidth = NULL, kernel = "gaussian") {
 
 #' Last Similar Dates (LSD) Model
 #'
-#' Creates a seasonal forecasting model based on similar historical dates.
+#' Creates a seasonal forecasting model based on similar historical
+#' dates.
 #'
 #' @param s Seasonal period (e.g., 7 for weekly, 12 for monthly)
-#' @param window_width Width of the window for averaging similar dates (default: 1)
-#' @param trend_correction Whether to apply trend correction (default: FALSE)
+#' @param window_width Width of the window for averaging similar dates
+#'   (default: 1)
+#' @param trend_correction Whether to apply trend correction
+#'   (default: FALSE)
 #'
 #' @return An LSDModel object
 #' @export
@@ -199,7 +203,9 @@ ARMAModel <- function(p = 0L, q = 0L, s = 0L,
   # For now, use simple keyword argument approach
   # Note: include_mean and include_drift may not be directly supported
   # They may need to be handled differently in Julia API
-  JuliaCall::julia_eval("ForecastBaselines.ARMAModel(p=p_val, q=q_val, s=s_val)")
+  JuliaCall::julia_eval(
+    "ForecastBaselines.ARMAModel(p=p_val, q=q_val, s=s_val)"
+  )
 }
 
 #' INARCH Model
@@ -225,10 +231,12 @@ INARCHModel <- function(p = 1L) {
 #'
 #' Creates an Error-Trend-Season exponential smoothing model.
 #'
-#' @param error_type Error type: "A" (additive), "M" (multiplicative), or "N" (none)
-#' @param trend_type Trend type: "A" (additive), "M" (multiplicative), "Ad" (damped additive),
-#'                   "Md" (damped multiplicative), or "N" (none)
-#' @param season_type Season type: "A" (additive), "M" (multiplicative), or "N" (none)
+#' @param error_type Error type: "A" (additive), "M" (multiplicative), or
+#'   "N" (none)
+#' @param trend_type Trend type: "A" (additive), "M" (multiplicative), "Ad"
+#'   (damped additive), "Md" (damped multiplicative), or "N" (none)
+#' @param season_type Season type: "A" (additive), "M" (multiplicative), or
+#'   "N" (none)
 #' @param s Seasonal period (required if season_type is not "N")
 #' @param damped Whether to use damped trend (default: FALSE)
 #'
@@ -244,10 +252,14 @@ INARCHModel <- function(p = 1L) {
 #' model <- ETSModel(error_type = "A", trend_type = "A", season_type = "N")
 #'
 #' # Holt-Winters additive (A,A,A)
-#' model <- ETSModel(error_type = "A", trend_type = "A", season_type = "A", s = 12)
+#' model <- ETSModel(
+#'   error_type = "A", trend_type = "A", season_type = "A", s = 12
+#' )
 #'
 #' # Holt-Winters multiplicative (M,M,M)
-#' model <- ETSModel(error_type = "M", trend_type = "M", season_type = "M", s = 12)
+#' model <- ETSModel(
+#'   error_type = "M", trend_type = "M", season_type = "M", s = 12
+#' )
 #' }
 ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
                      s = NULL, damped = FALSE) {
@@ -259,17 +271,28 @@ ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
   valid_season <- c("A", "M", "N")
 
   if (!error_type %in% valid_error) {
-    stop("error_type must be one of: ", paste(valid_error, collapse = ", "))
+    stop(
+      "error_type must be one of: ",
+      paste(valid_error, collapse = ", ")
+    )
   }
   if (!trend_type %in% valid_trend) {
-    stop("trend_type must be one of: ", paste(valid_trend, collapse = ", "))
+    stop(
+      "trend_type must be one of: ",
+      paste(valid_trend, collapse = ", ")
+    )
   }
   if (!season_type %in% valid_season) {
-    stop("season_type must be one of: ", paste(valid_season, collapse = ", "))
+    stop(
+      "season_type must be one of: ",
+      paste(valid_season, collapse = ", ")
+    )
   }
 
   if (season_type != "N" && is.null(s)) {
-    stop("Seasonal period 's' must be provided when season_type is not 'N'")
+    stop(
+      "Seasonal period 's' must be provided when season_type is not 'N'"
+    )
   }
 
   # Call Julia function using keyword arguments with String values
@@ -281,7 +304,10 @@ ETSModel <- function(error_type = "A", trend_type = "N", season_type = "N",
   } else {
     JuliaCall::julia_assign("s_val", as.integer(s))
     julia_code <- sprintf(
-      'ForecastBaselines.ETSModel(error="%s", trend="%s", season="%s", s=s_val)',
+      paste0(
+        'ForecastBaselines.ETSModel(error="%s", trend="%s", ',
+        'season="%s", s=s_val)'
+      ),
       error_type, trend_type, season_type
     )
   }

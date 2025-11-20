@@ -56,7 +56,8 @@ LogPlusOneTransform <- function(c = 1.0) {
 
 #' Square Root Transformation
 #'
-#' Creates a square root transformation. Useful for count data and variance stabilization.
+#' Creates a square root transformation. Useful for count data and variance
+#' stabilization.
 #'
 #' @return A SquareRootTransform object
 #' @export
@@ -161,7 +162,9 @@ transform_data <- function(x, transformation) {
   x_mat <- matrix(as.numeric(x), ncol = 1)
   JuliaCall::julia_assign("x_mat", x_mat)
   JuliaCall::julia_assign("trans_obj", transformation)
-  result <- JuliaCall::julia_eval("ForecastBaselines.transform(x_mat, trans_obj)")
+  result <- JuliaCall::julia_eval(
+    "ForecastBaselines.transform(x_mat, trans_obj)"
+  )
   as.numeric(result)
 }
 
@@ -183,10 +186,13 @@ transform_data <- function(x, transformation) {
 #' }
 inverse_transform_data <- function(y, transformation) {
   check_setup()
-  # Julia inverse_transform expects a vector (unlike transform which needs a matrix)
+  # Julia inverse_transform expects a vector (unlike transform which needs
+  # a matrix)
   JuliaCall::julia_assign("y_vec", as.numeric(y))
   JuliaCall::julia_assign("trans_obj", transformation)
-  result <- JuliaCall::julia_eval("ForecastBaselines.inverse_transform(y_vec, trans_obj)")
+  result <- JuliaCall::julia_eval(
+    "ForecastBaselines.inverse_transform(y_vec, trans_obj)"
+  )
   as.numeric(result)
 }
 
@@ -201,8 +207,8 @@ inverse_transform_data <- function(y, transformation) {
 #' @export
 #'
 #' @details
-#' **Not Implemented:** This function does not work because ForecastBaselines.jl
-#' does not implement `transform()` for model types.
+#' **Not Implemented:** This function does not work because
+#' ForecastBaselines.jl does not implement `transform()` for model types.
 #'
 #' **Recommended approach:** Transform your data manually in R before fitting:
 #'

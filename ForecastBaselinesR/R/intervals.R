@@ -20,18 +20,23 @@ NoInterval <- function() {
 
 #' Empirical Interval Method
 #'
-#' Creates prediction intervals by bootstrapping from historical forecast errors.
-#' This is a non-parametric method that doesn't assume any particular distribution.
+#' Creates prediction intervals by bootstrapping from historical forecast
+#' errors. This is a non-parametric method that doesn't assume any particular
+#' distribution.
 #'
-#' @param n_trajectories Number of bootstrap samples to generate (default: 1000)
+#' @param n_trajectories Number of bootstrap samples to generate
+#'   (default: 1000)
 #' @param min_observation Minimum number of observations required (default: 1)
-#' @param bootstrap_distribution Optional distribution to sample from (default: NULL)
+#' @param bootstrap_distribution Optional distribution to sample from
+#'   (default: NULL)
 #' @param seed Random seed for reproducibility (default: NULL)
-#' @param positivity_correction Method to ensure positive forecasts: "none", "post_clip",
-#'                              "truncate", or "zero_floor" (default: "none")
-#' @param symmetry_correction Whether to apply symmetry correction (default: FALSE)
+#' @param positivity_correction Method to ensure positive forecasts: "none",
+#'   "post_clip", "truncate", or "zero_floor" (default: "none")
+#' @param symmetry_correction Whether to apply symmetry correction
+#'   (default: FALSE)
 #' @param stepwise Whether to use stepwise intervals (default: FALSE)
-#' @param return_trajectories Whether to return forecast trajectories (default: FALSE)
+#' @param return_trajectories Whether to return forecast trajectories
+#'   (default: FALSE)
 #'
 #' @return An EmpiricalInterval object
 #' @export
@@ -66,7 +71,10 @@ EmpiricalInterval <- function(n_trajectories = 1000L,
   # Validate positivity_correction
   valid_pos_corr <- c("none", "post_clip", "truncate", "zero_floor")
   if (!positivity_correction %in% valid_pos_corr) {
-    stop("positivity_correction must be one of: ", paste(valid_pos_corr, collapse = ", "))
+    stop(
+      "positivity_correction must be one of: ",
+      paste(valid_pos_corr, collapse = ", ")
+    )
   }
 
   # Build Julia code string for the constructor
@@ -89,9 +97,15 @@ EmpiricalInterval <- function(n_trajectories = 1000L,
     sprintf("min_observation=%d", args$min_observation),
     if (!is.null(seed)) sprintf("seed=%d", args$seed),
     sprintf("positivity_correction=%s", args$positivity_correction),
-    sprintf("symmetry_correction=%s", tolower(as.character(args$symmetry_correction))),
+    sprintf(
+      "symmetry_correction=%s",
+      tolower(as.character(args$symmetry_correction))
+    ),
     sprintf("stepwise=%s", tolower(as.character(args$stepwise))),
-    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories)))
+    sprintf(
+      "return_trajectories=%s",
+      tolower(as.character(args$return_trajectories))
+    )
   )
   args_str <- paste(args_list, collapse = ", ")
 
@@ -101,11 +115,11 @@ EmpiricalInterval <- function(n_trajectories = 1000L,
 
 #' Parametric Interval Method
 #'
-#' Creates prediction intervals using parametric assumptions based on the model's
-#' distribution (e.g., assuming normality for ARMA models).
+#' Creates prediction intervals using parametric assumptions based on the
+#' model's distribution (e.g., assuming normality for ARMA models).
 #'
-#' @param positivity_correction Method to ensure positive forecasts: "none" or "post_clip"
-#'                              (default: "none")
+#' @param positivity_correction Method to ensure positive forecasts: "none"
+#'   or "post_clip" (default: "none")
 #'
 #' @return A ParametricInterval object
 #' @export
@@ -123,7 +137,10 @@ ParametricInterval <- function(positivity_correction = "none") {
 
   valid_pos_corr <- c("none", "post_clip")
   if (!positivity_correction %in% valid_pos_corr) {
-    stop("positivity_correction must be one of: ", paste(valid_pos_corr, collapse = ", "))
+    stop(
+      "positivity_correction must be one of: ",
+      paste(valid_pos_corr, collapse = ", ")
+    )
   }
 
   julia_code <- sprintf(
@@ -135,14 +152,15 @@ ParametricInterval <- function(positivity_correction = "none") {
 
 #' Model Trajectory Interval Method
 #'
-#' Creates prediction intervals by simulating trajectories from the fitted model.
-#' This method uses the model's own simulation mechanism.
+#' Creates prediction intervals by simulating trajectories from the fitted
+#' model. This method uses the model's own simulation mechanism.
 #'
 #' @param n_trajectories Number of trajectories to simulate (default: 1000)
 #' @param seed Random seed for reproducibility (default: NULL)
-#' @param positivity_correction Method to ensure positive forecasts: "none", "post_clip",
-#'                              "truncate", or "zero_floor" (default: "none")
-#' @param return_trajectories Whether to return forecast trajectories (default: FALSE)
+#' @param positivity_correction Method to ensure positive forecasts: "none",
+#'   "post_clip", "truncate", or "zero_floor" (default: "none")
+#' @param return_trajectories Whether to return forecast trajectories
+#'   (default: FALSE)
 #'
 #' @return A ModelTrajectoryInterval object
 #' @export
@@ -169,7 +187,10 @@ ModelTrajectoryInterval <- function(n_trajectories = 1000L,
 
   valid_pos_corr <- c("none", "post_clip", "truncate", "zero_floor")
   if (!positivity_correction %in% valid_pos_corr) {
-    stop("positivity_correction must be one of: ", paste(valid_pos_corr, collapse = ", "))
+    stop(
+      "positivity_correction must be one of: ",
+      paste(valid_pos_corr, collapse = ", ")
+    )
   }
 
   args <- list()
@@ -187,10 +208,16 @@ ModelTrajectoryInterval <- function(n_trajectories = 1000L,
     sprintf("n_trajectories=%d", args$n_trajectories),
     if (!is.null(seed)) sprintf("seed=%d", args$seed),
     sprintf("positivity_correction=%s", args$positivity_correction),
-    sprintf("return_trajectories=%s", tolower(as.character(args$return_trajectories)))
+    sprintf(
+      "return_trajectories=%s",
+      tolower(as.character(args$return_trajectories))
+    )
   )
   args_str <- paste(args_list, collapse = ", ")
 
-  julia_code <- sprintf("ForecastBaselines.ModelTrajectoryInterval(%s)", args_str)
+  julia_code <- sprintf(
+    "ForecastBaselines.ModelTrajectoryInterval(%s)",
+    args_str
+  )
   JuliaCall::julia_eval(julia_code)
 }

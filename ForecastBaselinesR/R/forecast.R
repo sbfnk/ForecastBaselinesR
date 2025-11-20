@@ -6,7 +6,8 @@
 #'
 #' @param x Numeric vector of time series data
 #' @param model A model object created by one of the model constructors
-#' @param temporal_info Optional TemporalInfo object with start date and resolution
+#' @param temporal_info Optional TemporalInfo object with start date and
+#'   resolution
 #'
 #' @return A fitted model object that can be used for forecasting
 #' @export
@@ -28,10 +29,17 @@ fit_baseline <- function(x, model, temporal_info = NULL) {
 
   # Fit the model
   if (is.null(temporal_info)) {
-    JuliaCall::julia_eval("fitted = ForecastBaselines.fit_baseline(x_data, model_obj)")
+    JuliaCall::julia_eval(
+      "fitted = ForecastBaselines.fit_baseline(x_data, model_obj)"
+    )
   } else {
     JuliaCall::julia_assign("temp_info", temporal_info)
-    JuliaCall::julia_eval("fitted = ForecastBaselines.fit_baseline(x_data, model_obj, temporal_info=temp_info)")
+    JuliaCall::julia_eval(
+      paste0(
+        "fitted = ForecastBaselines.fit_baseline(",
+        "x_data, model_obj, temporal_info=temp_info)"
+      )
+    )
   }
 
   # Return the fitted model
@@ -63,17 +71,20 @@ point_forecast <- function(fitted, horizon = 1L) {
     JuliaCall::julia_assign("h", as.integer(horizon))
   }
 
-  result <- JuliaCall::julia_eval("ForecastBaselines.point_forecast(fitted_obj, h)")
+  result <- JuliaCall::julia_eval(
+    "ForecastBaselines.point_forecast(fitted_obj, h)"
+  )
   as.numeric(result)
 }
 
 #' Generate Complete Forecast with Intervals
 #'
-#' Generates a complete forecast including point forecasts, prediction intervals,
-#' and optionally trajectories.
+#' Generates a complete forecast including point forecasts, prediction
+#' intervals, and optionally trajectories.
 #'
 #' @param fitted A fitted model object from fit_baseline()
-#' @param interval_method Interval method object (NoInterval, EmpiricalInterval, etc.)
+#' @param interval_method Interval method object (NoInterval,
+#'   EmpiricalInterval, etc.)
 #' @param horizon Integer or vector of integers specifying forecast horizons
 #' @param levels Numeric vector of confidence levels (default: 0.95)
 #' @param include_median Whether to include median forecast (default: TRUE)
@@ -139,7 +150,9 @@ forecast <- function(fitted,
       "include_median = inc_median, model_name = mdl_name)"
     )
     JuliaCall::julia_command(julia_cmd)
-    forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
+    forecast_result <- JuliaCall::julia_eval(
+      sprintf("forecast_to_r_dict(%s)", fc_id)
+    )
   } else {
     JuliaCall::julia_assign("truth_vals", as.numeric(truth))
     julia_cmd <- paste0(
@@ -148,7 +161,9 @@ forecast <- function(fitted,
       "include_median = inc_median, truth = truth_vals, model_name = mdl_name)"
     )
     JuliaCall::julia_command(julia_cmd)
-    forecast_result <- JuliaCall::julia_eval(sprintf("forecast_to_r_dict(%s)", fc_id))
+    forecast_result <- JuliaCall::julia_eval(
+      sprintf("forecast_to_r_dict(%s)", fc_id)
+    )
   }
 
   # Store the Julia variable name for later use (e.g., in score())
@@ -234,7 +249,9 @@ TemporalInfo <- function(start = 1, resolution = 1) {
     JuliaCall::julia_eval("start_date = Date(start_val)")
     # Convert integer resolution to Day period
     JuliaCall::julia_assign("res_val", as.integer(resolution))
-    JuliaCall::julia_eval("ForecastBaselines.TemporalInfo(start_date, Day(res_val))")
+    JuliaCall::julia_eval(
+      "ForecastBaselines.TemporalInfo(start_date, Day(res_val))"
+    )
   } else {
     JuliaCall::julia_call(
       "ForecastBaselines.TemporalInfo",
