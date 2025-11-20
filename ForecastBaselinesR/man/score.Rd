@@ -4,26 +4,46 @@
 \alias{score}
 \title{Score a Forecast}
 \usage{
-score(forecast, rule)
+score(
+  forecast,
+  metrics = NULL,
+  forecast_type = NULL,
+  summarise = TRUE,
+  by = c("model")
+)
 }
 \arguments{
 \item{forecast}{A Forecast object (from forecast() function)}
 
-\item{rule}{A scoring rule object (MAE, CRPS, WIS, etc.)}
+\item{metrics}{Optional named list of scoring metrics. If NULL, uses default
+metrics from scoringutils based on forecast type.}
+
+\item{forecast_type}{Type of forecast: "point" or "quantile". If NULL (default),
+will be inferred from the forecast object.}
+
+\item{summarise}{If TRUE (default), returns summarised scores. If FALSE, returns
+individual scores for each horizon.}
+
+\item{by}{Character vector of column names to group by when summarising.
+Default is c("model").}
 }
 \value{
-Numeric score value (lower is better for most rules)
+A data.frame with scores. If summarise=TRUE, returns aggregated scores.
 }
 \description{
-Evaluates a forecast using a specified scoring rule. The forecast must
-contain truth values.
+Evaluates a forecast using scoring metrics from the scoringutils package.
+The forecast must contain truth values.
 }
 \examples{
 \dontrun{
-# Score with MAE
-mae_score <- score(forecast, MAE())
+# Score with default metrics
+scores <- score(forecast)
 
-# Score with CRPS
-crps_score <- score(forecast, CRPS())
+# Score without summarising
+scores <- score(forecast, summarise = FALSE)
+
+# Score with custom metrics
+custom_metrics <- list(mae = scoringutils::ae_point)
+scores <- score(forecast, metrics = custom_metrics)
 }
 }

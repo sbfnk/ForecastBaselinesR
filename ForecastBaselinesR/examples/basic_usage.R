@@ -71,10 +71,13 @@ fc_with_truth <- add_truth(fc, truth)
 
 # Compute various scores
 cat("\nForecast scores:\n")
-cat("MAE:  ", round(score(fc_with_truth, MAE()), 3), "\n")
-cat("RMSE: ", round(score(fc_with_truth, RMSE()), 3), "\n")
-cat("CRPS: ", round(score(fc_with_truth, CRPS()), 3), "\n")
-cat("WIS:  ", round(score(fc_with_truth, WIS()), 3), "\n")
+cat("MAE:  ", round(MAE(fc_with_truth), 3), "\n")
+cat("RMSE: ", round(RMSE(fc_with_truth), 3), "\n")
+
+# Get all scores at once
+all_scores <- score(fc_with_truth)
+cat("\nAll available scores:\n")
+print(all_scores)
 
 # ============================================================================
 # Example 4: Different Models Comparison
@@ -113,9 +116,8 @@ for (model_name in names(models)) {
 
   results <- rbind(results, data.frame(
     Model = model_name,
-    MAE = score(fc, MAE()),
-    RMSE = score(fc, RMSE()),
-    CRPS = score(fc, CRPS())
+    MAE = MAE(fc),
+    RMSE = RMSE(fc)
   ))
 }
 

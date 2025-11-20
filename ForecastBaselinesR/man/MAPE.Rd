@@ -4,18 +4,20 @@
 \alias{MAPE}
 \title{Mean Absolute Percentage Error (MAPE)}
 \usage{
-MAPE()
+MAPE(forecast)
+}
+\arguments{
+\item{forecast}{A Forecast object (from forecast() function)}
 }
 \value{
-A MAPE scoring rule object
+Numeric MAPE value (as a proportion, not percentage)
 }
 \description{
-Creates a MAPE scoring rule object. MAPE measures the average absolute
-percentage error.
+Computes the Mean Absolute Percentage Error for a forecast. This is a
+convenience wrapper around score() that returns only the MAPE value.
 }
 \examples{
 \dontrun{
-rule <- MAPE()
-score_value <- score(forecast, rule)
+mape_score <- MAPE(forecast)
 }
 }

@@ -230,32 +230,41 @@ fc_with_truth <- forecast(
 )
 
 # Calculate scoring metrics
-mae_score <- score(fc_with_truth, MAE())
-rmse_score <- score(fc_with_truth, RMSE())
-mape_score <- score(fc_with_truth, MAPE())
+mae_score <- MAE(fc_with_truth)
+rmse_score <- RMSE(fc_with_truth)
+mape_score <- MAPE(fc_with_truth)
 
 cat("Mean Absolute Error:", mae_score, "\n")
 cat("Root Mean Squared Error:", rmse_score, "\n")
-cat("Mean Absolute Percentage Error:", mape_score, "%\n")
+cat("Mean Absolute Percentage Error:", mape_score, "\n")
+
+# Get all scores at once using scoringutils
+all_scores <- score(fc_with_truth)
+print(all_scores)
 ```
 
 ## Available Scoring Rules
 
+**Note:** Scoring is now powered by the [scoringutils](https://epiforecasts.io/scoringutils/) package, providing standardized and comprehensive forecast evaluation.
+
 **Point Forecast Metrics:**
 
-- `MAE()` - Mean Absolute Error
-- `RMSE()` - Root Mean Squared Error
-- `MSE()` - Mean Squared Error
-- `MAPE()` - Mean Absolute Percentage Error
-- `MdAE()` - Median Absolute Error
-- `Bias()` - Forecast bias
-- `RelativeBias()` - Relative bias
+- `MAE(forecast)` - Mean Absolute Error
+- `RMSE(forecast)` - Root Mean Squared Error
+- `MSE(forecast)` - Mean Squared Error
+- `MAPE(forecast)` - Mean Absolute Percentage Error
 
 **Probabilistic Metrics:**
 
-- `LogScore()` - Logarithmic score
-- `CRPS()` - Continuous Ranked Probability Score (requires intervals)
-- `WIS()` - Weighted Interval Score (requires intervals)
+- `WIS(forecast)` - Weighted Interval Score (requires quantiles/intervals)
+- `CRPS(forecast)` - Continuous Ranked Probability Score (approximated via WIS for quantile forecasts)
+
+**General Scoring:**
+
+- `score(forecast)` - Compute all available metrics for the forecast type
+- `score(forecast, summarise = FALSE)` - Get scores for each horizon separately
+- `get_available_metrics("point")` - See all available point forecast metrics
+- `get_available_metrics("quantile")` - See all available quantile forecast metrics
 
 ## Compare Multiple Models
 
@@ -278,9 +287,9 @@ results <- lapply(names(models), function(name) {
 
   data.frame(
     Model = name,
-    MAE = score(fc, MAE()),
-    RMSE = score(fc, RMSE()),
-    MAPE = score(fc, MAPE())
+    MAE = MAE(fc),
+    RMSE = RMSE(fc),
+    MAPE = MAPE(fc)
   )
 })
 

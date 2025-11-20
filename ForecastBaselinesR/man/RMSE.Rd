@@ -4,17 +4,19 @@
 \alias{RMSE}
 \title{Root Mean Squared Error (RMSE)}
 \usage{
-RMSE()
+RMSE(forecast)
+}
+\arguments{
+\item{forecast}{A Forecast object (from forecast() function)}
 }
 \value{
-An RMSE scoring rule object
+Numeric RMSE value
 }
 \description{
-Creates an RMSE scoring rule object. RMSE is the square root of MSE.
+Computes the Root Mean Squared Error for a forecast.
 }
 \examples{
 \dontrun{
-rule <- RMSE()
-score_value <- score(forecast, rule)
+rmse_score <- RMSE(forecast)
 }
 }

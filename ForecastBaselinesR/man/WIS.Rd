@@ -4,21 +4,20 @@
 \alias{WIS}
 \title{Weighted Interval Score (WIS)}
 \usage{
-WIS(weights = NULL)
+WIS(forecast)
 }
 \arguments{
-\item{weights}{Optional vector of weights for different horizons}
+\item{forecast}{A Forecast object with quantiles or intervals}
 }
 \value{
-A WIS scoring rule object
+Numeric WIS value
 }
 \description{
-Creates a WIS scoring rule object. WIS is a proper scoring rule for
-prediction intervals that combines sharpness and calibration.
+Computes the Weighted Interval Score for a quantile forecast. This is a
+proper scoring rule for prediction intervals.
 }
 \examples{
 \dontrun{
-rule <- WIS()
-score_value <- score(forecast, rule)
+wis_score <- WIS(forecast)
 }
 }

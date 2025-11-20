@@ -4,18 +4,20 @@
 \alias{MAE}
 \title{Mean Absolute Error (MAE)}
 \usage{
-MAE()
+MAE(forecast)
+}
+\arguments{
+\item{forecast}{A Forecast object (from forecast() function)}
 }
 \value{
-An MAE scoring rule object
+Numeric MAE value
 }
 \description{
-Creates an MAE scoring rule object. MAE measures the average absolute
-difference between forecasts and observations.
+Computes the Mean Absolute Error for a forecast. This is a convenience
+wrapper around score() that returns only the MAE value.
 }
 \examples{
 \dontrun{
-rule <- MAE()
-score_value <- score(forecast, rule)
+mae_score <- MAE(forecast)
 }
 }
