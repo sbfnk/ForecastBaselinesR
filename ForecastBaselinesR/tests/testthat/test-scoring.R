@@ -256,7 +256,7 @@ test_that("get_available_metrics returns list for quantile forecasts", {
 
 # Deprecated Function Tests ---------------------------------------------
 
-test_that("deprecated functions show warnings", {
+test_that("deprecated functions show warnings and errors", {
   skip_if_no_julia()
   skip_on_cran()
 
@@ -274,12 +274,15 @@ test_that("deprecated functions show warnings", {
   )
 
   # These functions are deprecated and should throw errors
-  expect_error(MdAE(fc), "no longer supported")
-  expect_error(MSPE(fc), "no longer supported")
-  expect_error(RelativeBias(fc), "no longer supported")
-  expect_error(CRPS_trajectory(fc), "no longer supported")
-  expect_error(PIT_function(fc), "no longer supported")
-  expect_error(CvM_divergence(fc), "no longer supported")
+  # Suppress the expected deprecation warnings
+  suppressWarnings({
+    expect_error(MdAE(fc), "no longer supported")
+    expect_error(MSPE(fc), "no longer supported")
+    expect_error(RelativeBias(fc), "no longer supported")
+    expect_error(CRPS_trajectory(fc), "no longer supported")
+    expect_error(PIT_function(fc), "no longer supported")
+    expect_error(CvM_divergence(fc), "no longer supported")
+  })
 })
 
 # Multiple Models Comparison --------------------------------------------
