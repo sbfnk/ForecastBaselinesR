@@ -97,11 +97,14 @@ truth <- c(5.0, 5.2, 5.4, 5.1, 5.3)
 fc_with_truth <- add_truth(fc, truth)
 
 # 5. Score the forecast
-mae <- score(fc_with_truth, MAE())
-crps <- score(fc_with_truth, CRPS())
+mae <- MAE(fc_with_truth)
+rmse <- RMSE(fc_with_truth)
+
+# Or get all scores at once
+all_scores <- score(fc_with_truth)
 
 cat("MAE:", mae, "\n")
-cat("CRPS:", crps, "\n")
+cat("RMSE:", rmse, "\n")
 ```
 
 ## Examples
@@ -156,8 +159,8 @@ results <- lapply(names(models), function(name) {
 
   list(
     model = name,
-    mae = score(fc, MAE()),
-    crps = score(fc, CRPS())
+    mae = MAE(fc),
+    rmse = RMSE(fc)
   )
 })
 
@@ -266,19 +269,22 @@ interval_method = ModelTrajectoryInterval(
 
 ## Scoring Rules
 
+**Scoring powered by [scoringutils](https://epiforecasts.io/scoringutils/)**
+
 ### Point Forecast Scores
-- `MAE()` - Mean Absolute Error
-- `MdAE()` - Median Absolute Error
-- `MAPE()` - Mean Absolute Percentage Error
-- `MSE()` - Mean Squared Error
-- `RMSE()` - Root Mean Squared Error
-- `Bias()` - Forecast bias
-- `RelativeBias()` - Relative bias
+- `MAE(forecast)` - Mean Absolute Error
+- `RMSE(forecast)` - Root Mean Squared Error
+- `MSE(forecast)` - Mean Squared Error
+- `MAPE(forecast)` - Mean Absolute Percentage Error
 
 ### Probabilistic Scores
-- `CRPS()` - Continuous Ranked Probability Score
-- `WIS()` - Weighted Interval Score
-- `CRPS_trajectory()` - CRPS from trajectories
+- `WIS(forecast)` - Weighted Interval Score
+- `CRPS(forecast)` - Continuous Ranked Probability Score (via WIS)
+
+### General Scoring
+- `score(forecast)` - Compute all available metrics
+- `score(forecast, summarise = FALSE)` - Get per-horizon scores
+- `get_available_metrics("point")` - List available metrics
 
 ## Package Structure
 
