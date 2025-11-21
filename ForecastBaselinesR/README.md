@@ -83,26 +83,27 @@ model <- ARMAModel(p = 1, q = 1)
 # 2. Fit the model
 fitted <- fit_baseline(data, model)
 
-# 3. Generate forecasts with prediction intervals
+# 3. Generate forecasts with quantiles for probabilistic evaluation
 fc <- forecast(
   fitted,
   interval_method = EmpiricalInterval(n_trajectories = 1000),
   horizon = 1:5,
-  levels = c(0.80, 0.95)
+  levels = c(0.50, 0.80, 0.95)
 )
 
 # 4. Evaluate with true values
 truth <- c(5.0, 5.2, 5.4, 5.1, 5.3)
 fc_with_truth <- add_truth(fc, truth)
 
-# 5. Score the forecast
-fc_point <- scoringutils::as_forecast_point(fc_with_truth)
-scores <- scoringutils::score(fc_point)
+# 5. Score the probabilistic forecast
+fc_quantile <- scoringutils::as_forecast_quantile(fc_with_truth)
+scores <- scoringutils::score(fc_quantile)
 scores_summary <- scoringutils::summarise_scores(scores, by = "model")
 
-# Access specific metrics
-cat("MAE:", scores_summary$ae_point, "\n")
-cat("RMSE:", sqrt(scores_summary$se_point), "\n")
+# Access probabilistic metrics
+cat("WIS:", scores_summary$wis, "\n")
+cat("Interval Coverage 50%:", scores_summary$interval_coverage_50, "\n")
+cat("Interval Coverage 95%:", scores_summary$interval_coverage_95, "\n")
 print(scores_summary)
 ```
 
@@ -345,11 +346,11 @@ setup_ForecastBaselines(install_package = FALSE)
 If you use this package in your research, please cite:
 
 ```
-@software{forecastbaselines,
-  title = {ForecastBaselines.jl: Baseline Forecasting Models in Julia},
-  author = {...},
-  year = {2024},
-  url = {https://github.com/ManuelStapper/ForecastBaselines.jl}
+@software{forecastbaselinesr,
+  title = {ForecastBaselinesR: R Interface to ForecastBaselines.jl},
+  author = {Stapper, Manuel and Funk, Sebastian},
+  year = {2025},
+  url = {https://github.com/sbfnk/ForecastBaselinesR}
 }
 ```
 
