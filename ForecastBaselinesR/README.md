@@ -344,14 +344,26 @@ setup_ForecastBaselines(install_package = FALSE)
 
 ## Citation
 
-If you use this package in your research, please cite:
+If you use this package in your research, please cite the software and the associated preprint:
 
+**Software:**
 ```
 @software{forecastbaselinesr,
   title = {ForecastBaselinesR: R Interface to ForecastBaselines.jl},
   author = {Stapper, Manuel and Funk, Sebastian},
   year = {2025},
   url = {https://github.com/sbfnk/ForecastBaselinesR}
+}
+```
+
+**Preprint:**
+```
+@article{stapper2025baseline,
+  title = {Mind the Baseline: The Hidden Impact of Reference Model Selection on Forecast Assessment},
+  author = {Stapper, Manuel and Funk, Sebastian},
+  year = {2025},
+  doi = {10.1101/2025.08.01.25332807},
+  url = {https://doi.org/10.1101/2025.08.01.25332807}
 }
 ```
 
