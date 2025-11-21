@@ -226,7 +226,8 @@ fc_with_truth <- forecast(
   fitted,
   interval_method = NoInterval(),
   horizon = 1:12,
-  truth = truth
+  truth = truth,
+  model_name = "Constant"
 )
 
 # Calculate scoring metrics using scoringutils
@@ -288,7 +289,8 @@ results <- lapply(names(models), function(name) {
   fc <- forecast(fitted,
     interval_method = NoInterval(),
     horizon = 1:12,
-    truth = truth
+    truth = truth,
+    model_name = name
   )
 
   fc_point <- scoringutils::as_forecast_point(fc)
@@ -443,7 +445,8 @@ fc <- forecast(fitted,
   interval_method = EmpiricalInterval(n_trajectories = 1000),
   horizon = 1:12,
   levels = 0.95,
-  truth = truth_values
+  truth = truth_values,
+  model_name = "ARMA(2,1)"
 )
 
 # 5. Score forecasts

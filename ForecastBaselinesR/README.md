@@ -88,7 +88,8 @@ fc <- forecast(
   fitted,
   interval_method = EmpiricalInterval(n_trajectories = 1000),
   horizon = 1:5,
-  levels = c(0.50, 0.80, 0.95)
+  levels = c(0.50, 0.80, 0.95),
+  model_name = "ARMA(1,1)"
 )
 
 # 4. Evaluate with true values
